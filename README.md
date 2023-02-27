@@ -1,4 +1,10 @@
+# Scraping and analyzing the Value Investors Club
+
+This is a project to scrape and analyze the website www.ValueInvestorsClub.com. It is a great website full of thousands of investing ideas that outperform the market on average. This repository briefly scrapes and analyzes them.
+
+# Table Of Contents
 - [Scraping and analyzing the Value Investors Club](#scraping-and-analyzing-the-value-investors-club)
+- [Table Of Contents](#table-of-contents)
 - [Results](#results)
 - [What's next?](#whats-next)
 - [Please, don't just clone and scrape!](#please-dont-just-clone-and-scrape)
@@ -11,10 +17,6 @@
     - [ValueInvestorsClub/ValueInvestorsClub/models](#valueinvestorsclubvalueinvestorsclubmodels)
 - [Pricing Data](#pricing-data)
 - [ValueInvestorsClub Scraper.](#valueinvestorsclub-scraper)
-
-# Scraping and analyzing the Value Investors Club
-
-This is a project to scrape and analyze the website www.ValueInvestorsClub.com. It is a great website full of thousands of investing ideas that outperform the market on average. This repository briefly scrapes and analyzes them.
 
 # Results
 
@@ -48,7 +50,7 @@ The above is the non-annualized total 5 year change in stock price for all of th
 
 ![Five year short performance graph](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/FiveYearShortPerf.png?raw=true)
 
-The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one. We'll look at percentage gain later. We know a decent number of these companies would have gone under so and have been de-listed so this number will be artificially high. You also can see a few stocks that really hurt our average that had 4000% and 2500% gains. 
+The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one. We'll look at percentage gain later. We know a decent number of these companies would have gone under so and have been de-listed so this number will be artificially high. You also can see a stock that really hurt our average that had 2500% gains. 
 
 ![Six Month Long Contest Winner Performance](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/SixMonthLongContestPerf.png?raw=true)
 
@@ -61,6 +63,8 @@ Similarly, we can see the non-annualized change in price of shorts over the same
 We can see the stark difference in performance when comparing the median performance of all long ideas compared to the median performance of all short ideas across various time intervals from when the idea was originally posted.
 
 ![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/ShortAndLongReturns.png?raw=true)
+
+The biggest takeaways from this data are    
 
 
 # What's next?
@@ -176,15 +180,17 @@ https://stooq.com/db/h/
 
 It's great, but I have a problem with resolving exchanges. I didn't capture country of origin data when scraping initially. Huge mistake!
 
+So I had a ticker and a name in my DB, and I had pricing data which had tickers, prices and exchanges.
+
 I can fix this in a couple more days of scraping and updated my DB, but I would rather get done what I can even if it isn't perfect so I don't discover other things like this while sinking more work into a dataset.
 
-I pulled some additional CSV's from here. They have a good mapping of US companies, their names to tickers.
+I pulled some additional CSV's from here. They have a good mapping of US companies to their associated tickers.
 https://datahub.io/core/nyse-other-listings
 
 I pushed that into numpy and lowercased all of the company names and tickers.
 
-Then I'll go through each company and find a company ticker that exists in one of my US csvs.
-Then I'll check the first word in company name exists somewhere in the associated ticker list from companies CSV and partially matches the company name in the pricing data.
+Then I went through each idea, found 
+Then I checked that at least one of the words 3 or more characters in length is in a company name in the csv and the database. I also checked that the word isn't in a list of extremely common words.
 
 If all of that checks out, then I'll look up each price for each of the days relative to the post day and add the performance metrics.
 
