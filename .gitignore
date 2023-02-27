@@ -1,3 +1,5 @@
 venv/
 ValueInvestorsClub/ValueInvestorsClub/__pycache__/
 ValueInvestorsClub/ValueInvestorsClub/spiders/__pycache__/
+__pycache__
+ValueInvestorsClub/__pycache__

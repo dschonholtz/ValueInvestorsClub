@@ -43,7 +43,7 @@ def load_more_ideas(driver):
 
 def main():
 
-    date_val = '04/27/2003'
+    date_val = '02/27/2023'
 
     # Create a new instance of the Chrome driver
     # chrome_options = Options()

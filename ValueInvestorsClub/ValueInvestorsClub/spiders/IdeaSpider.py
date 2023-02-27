@@ -1,5 +1,34 @@
+"""
+The following inserts all scraped links into a postgres sql database. 
+Unfortunately, this creates some duplicates.
+To view those we make a query that selects duplicate ideas where the user, ticker and date are all the same.
+
+select * from ideas full outer join companies full outer join where date in (select date from ideas group by id having count(*) > 1);
+"""
+
+
 import scrapy
 from ValueInvestorsClub.items import ValueinvestorsclubItem
+import subprocess
+
+def rotate_ip():
+    command = "protonvpn-cli c -r"
+    command = command.split()
+    # run the above command and then print the output
+    try:
+        output = subprocess.check_output(command)
+    except subprocess.CalledProcessError as e:
+        print('There was an error', e, '\nTrying again.')
+        try:
+            disconect_out = subprocess.check_output("protonvpn-cli d".split())
+            print('disconnect_out: ' + str(disconect_out))
+            output = subprocess.check_output(command)
+            print(output)
+        except subprocess.CalledProcessError as e2:
+            print('Second time means it ain\'t gonna work', str(e2), '\nKilling.')
+            raise e2
+    print('Rotating IP')
+    print(output)
 
 class IdeaSpider(scrapy.Spider):
     name = 'IdeaSpider'
@@ -15,8 +44,14 @@ class IdeaSpider(scrapy.Spider):
 
     def start_requests(self):
         idea_links = self.load_idea_links()
-        for link in idea_links[:2]:
+        # every 20 links rotate the ip.
+        count = 0
+        for link in idea_links[13860:]:
+            count += 1
+            if count % 10 == 0:
+                rotate_ip()
             yield scrapy.Request(link, self.parse)
+
         # yield scrapy.Request("https://www.valueinvestorsclub.com/idea/InPost/5698302853", self.parse)
 
     def parse(self, response):
@@ -84,12 +119,12 @@ class IdeaSpider(scrapy.Spider):
         yield ValueinvestorsclubItem(
             ticker=company_ticker,
             link=link,
-            company_name=company_name,
+            companyName=company_name,
             date = date,
             username=username,
-            user_link=username_link,
-            short=False,
-            isContestWinner=False,
+            userLink=username_link,
+            isShort=short,
+            isContestWinner=contest_winner,
             description=description,
             catalysts=catalysts
         )

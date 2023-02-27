@@ -1,7 +1,7 @@
 """
 SQL Alchemy Base class that other sql alchemy classes will inherit from.
 """
-from sqlalchemy.ext.declarative import DeclarativeBase
+from sqlalchemy.orm import DeclarativeBase
 
 
 class Base(DeclarativeBase):

@@ -34,15 +34,15 @@ class ValueinvestorsclubItem(scrapy.Item):
     # This is the ticker symbol of the company
     ticker = scrapy.Field()
     # This is the name of the company
-    company_name = scrapy.Field()
+    companyName = scrapy.Field()
     # This is the date the idea was posted
     date = scrapy.Field()
     # This is the name of the author of the idea
     username = scrapy.Field()
-    user_link = scrapy.Field()
+    userLink = scrapy.Field()
     
     # This is the short bool
-    short = scrapy.Field()
+    isShort = scrapy.Field()
     
     # This is the isContestWinner bool
     isContestWinner = scrapy.Field()
@@ -76,3 +76,7 @@ class ValueinvestorsclubItem(scrapy.Item):
     
     # This is the price 5 years out
     price5Yr = scrapy.Field()
+
+    def __repr__(self):
+        """only print out attr1 after exiting the Pipeline"""
+        return repr({"link": str(self["link"])})

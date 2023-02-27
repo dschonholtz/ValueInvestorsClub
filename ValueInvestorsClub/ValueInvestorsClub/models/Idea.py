@@ -1,31 +1,32 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy import DateTime, Boolean, Float
+from sqlalchemy import DateTime, Boolean, Float, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
 
-from ValueInvestorsClub.models.Base import Base
+try:
+    from ValueInvestorsClub.models.Base import Base
+except ImportError:
+    # This is a bit of an ugly mess but it enables the spider to work and the ipynb to work up a few dirs.
+    from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
 
 class Idea(Base):
-    __tablename__ = "idea"
+    __tablename__ = "ideas"
 
-    id: Mapped[int] = mapped_column(primary_key=True)
-    companyId: Mapped[int] = mapped_column(ForeignKey("company.id"))
-    descriptionId: Mapped[int] = mapped_column(ForeignKey("description.id"))
-    catalystId: Mapped[int] = mapped_column(ForeignKey("catalyst.id"))
-    userId: Mapped[int] = mapped_column(ForeignKey("user_account.id"))
-    date: Mapped[str] = mapped_column(DateTime)
-    isShort : Mapped[bool] = mapped_column(Boolean)
-    isContestWinner : Mapped[bool] = mapped_column(Boolean)
-    price: Mapped[float] = mapped_column(Float)
-    price1Mo: Mapped[float] = mapped_column(Float)
-    price3Mo: Mapped[float] = mapped_column(Float)
-    price6Mo: Mapped[float] = mapped_column(Float)
-    price1Yr: Mapped[float] = mapped_column(Float)
-    price2Yr: Mapped[float] = mapped_column(Float)
-    price3Yr: Mapped[float] = mapped_column(Float)
-    price5Yr: Mapped[float] = mapped_column(Float)
+    id: Mapped[str] = mapped_column(primary_key=True)
+    link: Mapped[str] = mapped_column(String(256))
+    company_id: Mapped[int] = mapped_column(ForeignKey("companies.ticker"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_link"))
+    date: Mapped[DateTime] = mapped_column(DateTime)
+    is_short : Mapped[bool] = mapped_column(Boolean)
+    is_contest_winner : Mapped[bool] = mapped_column(Boolean)
 
 
     def __repr__(self) -> str:
-        return f"Idea(id={self.id!r}, companyId={self.companyId!r}, descriptionId={self.descriptionId!r}, catalystId={self.catalystId!r}, userId={self.userId!r}, date={self.date!r}, isShort={self.isShort!r}, isContestWinner={self.isContestWinner!r}, price={self.price!r}, price1Mo={self.price1Mo!r}, price3Mo={self.price3Mo!r}, price6Mo={self.price6Mo!r}, price1Yr={self.price1Yr!r}, price2Yr={self.price2Yr!r}, price3Yr={self.price3Yr!r}, price5Yr={self.price5Yr!r})"
+        return (f"Idea(id={self.id!r}, "
+            f"companyId={self.company_id!r}, "
+            f"link={self.link!r},"
+            f"userId={self.user_id!r}, "
+            f"date={self.date!r}, "
+            f"isShort={self.is_short!r}, "
+            f"isContestWinner={self.is_contest_winner!r})")
 
