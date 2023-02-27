@@ -109,3 +109,8 @@ Then I'll check the first word in company name exists somewhere in the associate
 If all of that checks out, then I'll look up each price for each of the days relative to the post day and add the performance metrics.
 
 After that, I can rank investors by US stock performance prediction over various time frames.
+# ValueInvestorsClub Scraper.
+
+Data is at the top level. See nested ValueInvestorsClub dir for scrapy dir. Uses SQL Alchemy to save scrapy outputs to sql output.
+
+See top level scraping python for scrapin gof links
