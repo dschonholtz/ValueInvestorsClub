@@ -26,7 +26,7 @@ Many of the associated tickers stop being actively traded on account of going pr
 
 We can see the percentage of companies that become de-listed x days after an idea is posted in this plot:
 
-![Percentage of companies that are de-listed, x days after an idea is posted.](https://github.com/dschonholtz/ValueInvestorsClub/pics/PercentNone.png])
+![Percentage of companies that are de-listed, x days after an idea is posted.](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/PercentNone.png?raw=true)
 
 # What's next?
 
@@ -35,8 +35,8 @@ I have access to quantopedia and have been chatting with Systemic Alpha here at 
 
 # Please, don't just clone and scrape!
 
-The ValueInvestorsClub is an amazing website. I don't want folks to scrape it more than necessary potentially causing unnecessary load to their servers and if I find this getting too much traffic I'll be taking the repo private.
-If you want the associated data please contact me @ schonholtz {dot} d {at} northeastern {dot} edu 
+The ValueInvestorsClub is an amazing website. I don't want folks to scrape it more than necessary potentially causing unnecessary load to their servers. If I find this getting too much traffic I'll be taking the repo private.
+If you want the associated data please contact me or just generally want to chat, contact me @ schonholtz {dot} d {at} northeastern {dot} edu 
 
 
 # Running this tool
