@@ -22,7 +22,13 @@ For a full breakdown of calculated results see the top level pricing.ipynb. It a
 
 To understand the data, you must understand the ValueInvestorsClub segments their investment ideas into several trackable buckets. Country of origin, short vs long, and contest winners. Where each idea represents a given tradable equity somewhere in the global market. Shorts are ideas where the thesis states the companies stock is expected to go down, and longs expect the company to go up. Contest winners are winners of the ValueInvestorClubs monthly contest of what is decided to be the best idea of the week. This is decided based on the estimated merit of the idea.
 
-Some basic stats, I scraped a total of 13656 ideas. Of those, I found matching US companies historical pricing data for 2370. This is because the majority of the ideas pitched are international.  
+Some basic stats, I scraped a total of 13656 ideas. Of those, I found matching US companies historical pricing data for 2370. This is because the majority of the ideas pitched are international. 
+
+We can see the annualized median returns of all groups of investment ideas below.
+
+![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/AllReturns.png?raw=true)
+
+If we look at the median returns for all time frames and broken out across all groups of ideas, we see that the long contest winners aggressively are piled onto so much that the share price moves a disproportionate amount within the first weeks and month of an idea being posted. This seems to suggest that the ValueInvestorsClub moves the market. Also, since a contest winner is announced every week, there may be disproportionate alpha in investing in contest winners the second they are announced completely naively, and then selling one to two weeks later.
 
 Many of the associated tickers stop being actively traded on account of going private, going bankrupt, getting acquired or some other reason for being de-listed.
 
@@ -30,19 +36,19 @@ We can see the percentage of companies that become de-listed x days after an ide
 
 ![Percentage of companies that are de-listed, x days after an idea is posted.](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/PercentNone.png?raw=true)
 
-It is interesting to see long positions get de-listed significantly more often than shorts. Presumably, this is because the long companies are attractive companies to acquire and the acquisition rate + going private rate is substantially higher than the number of companies going bankrupt. Therefore, these attractive companies get bought up and disappear at a higher rate than the private companies.
+It is interesting to see long positions get de-listed significantly more often than shorts. Presumably, this is because the long companies are attractive companies to acquire and the acquisition rate + going private rate is substantially higher than the number of companies going bankrupt. Therefore, these attractive companies get bought up and disappear at a higher rate than the companies which are recommended to be shorted by value investor club investors.
 
-There are extreme outliers that skew various average returns, but generally, medians seem representative of the various distributions. It is also worth noting, 
+There are extreme outliers that skew various average returns, but generally, medians seem representative of the various distributions.
 
  Below are a few examples:
 
 ![Five year performance distribution, non-annualized](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/FiveYearLongPerf.png?raw=true)
 
-The above is the non-annualized total 5 year change in stock price for all of the companies that have data for it. Note the few outliers far out on the tails.
+The above is the non-annualized total 5 year change in stock price for all of the companies that have data for it. Note the few outliers far out on the right tail.
 
 ![Five year short performance graph](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/FiveYearShortPerf.png?raw=true)
 
-The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one to make a profit. We'll look at percentage gain later. We know a decent number of these companies would have gone under so and have been de-listed so this number will be artificially high. You also can see a few stocks that really hurt our average that had 4000% gains. 
+The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one. We'll look at percentage gain later. We know a decent number of these companies would have gone under so and have been de-listed so this number will be artificially high. You also can see a few stocks that really hurt our average that had 4000% and 2500% gains. 
 
 ![Six Month Long Contest Winner Performance](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/SixMonthLongContestPerf.png?raw=true)
 
@@ -52,21 +58,15 @@ The above is the non-annualized 6 month change in price of contest winners. You 
 
 Similarly, we can see the non-annualized change in price of shorts over the same time period. This is one of the few places where shorts successfully get a negative change in share price.
 
-![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/AllReturns.png?raw=true)
-
-If we look at the median returns for all time frames and broken out across all groups of ideas, we see that the long contest winners aggressively are piled onto within the first weeks and month of the idea being posted. This seems to suggest the post aggressively moves the market. Also, since the contest winner is announced every week, so this does appear to suggest there may be disproportionate alpha in investing in contest winners the second they are announced completely naively. 
-
-Because of the outsized returns of the contest winners in the previous graph, it is helpful to look at the chart without the contest winners.
+We can see the stark difference in performance when comparing the median performance of all long ideas compared to the median performance of all short ideas across various time intervals from when the idea was originally posted.
 
 ![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/ShortAndLongReturns.png?raw=true)
 
 
-Above we see total annualized returns for all time periods.
-
 # What's next?
-- You should hire me! I love doing this kinda stuff and am looking to do more of it, in perhaps a more formal workflow.
-- I have access to quantopedia and have been chatting with Systemic Alpha here at Northeastern with the goal of properly backtesting some of this data, to see how off my numbers are.
-- Attempt to do classification of ideas as contest winners.
+- You should hire me! I love doing this kinda stuff and am looking to do more of it in a more formal workflow.
+- I have access to quantopedia and have been chatting with Systemic Alpha here at Northeastern with the goal of properly backtesting some of this data to see how off my numbers are.
+- Attempt to do classification of ideas as contest winners, and then to see if we could generate high returns by investing in projected contest winners.
 - Fine tune a large language model to write ideas based off of the worst 10% of ideas or the best 10% performing ideas.
 - Rank investors! There seem to be strong incentives to pump or dump on stocks. It would be interesting to see if there are investors that are intentionally writing bad analysis. It also would be interesting to see if you could follow a subset of authors and get disproportionate returns. 
 - See if the percentage annualized returns change over time. I strongly suspect that the ValueInvestorsClub is moving the market, and that appears to be supported by the high 1-2 week return in contest winners. It would be interesting to see if that happened when the site first launched in 2001 and had a smaller user base.
