@@ -1,3 +1,44 @@
+- [Scraping and analyzing the Value Investors Club](#scraping-and-analyzing-the-value-investors-club)
+- [Results](#results)
+- [What's next?](#whats-next)
+- [Please, don't just clone and scrape!](#please-dont-just-clone-and-scrape)
+- [Running this tool](#running-this-tool)
+- [connect to the DB image with:](#connect-to-the-db-image-with)
+- [Structure:](#structure)
+  - [Scraper:](#scraper)
+  - [ProcessLinks](#processlinks)
+  - [ValueInvestorsClub](#valueinvestorsclub)
+    - [ValueInvestorsClub/ValueInvestorsClub/models](#valueinvestorsclubvalueinvestorsclubmodels)
+- [Pricing Data](#pricing-data)
+- [ValueInvestorsClub Scraper.](#valueinvestorsclub-scraper)
+
+# Scraping and analyzing the Value Investors Club
+
+This is a project to scrape and analyze the website www.ValueInvestorsClub.com. It is a great website full of thousands of investing ideas that outperform the market on average. This repository briefly scrapes and analyzes them.
+
+# Results
+
+For a full breakdown of calculated results see the top level pricing.ipynb. It adds the pricing data to the SQLDB , then does many different forms of analysis on it, some of that analysis is discussed here.
+
+To understand the data, you must understand the ValueInvestorsClub segments their investment ideas into several trackable buckets. Country of origin, short vs long, and contest winners. Where each idea represents a given tradable equity somewhere in the global market. 
+
+Many of the associated tickers stop being actively traded on account of going private, going bankrupt, getting aquired or some other reason for being de-listed.
+
+We can see the percentage of companies that become de-listed x days after an idea is posted in this plot:
+
+![Percentage of companies that are de-listed, x days after an idea is posted.](https://github.com/dschonholtz/ValueInvestorsClub/pics/PercentNone.png])
+
+# What's next?
+
+I have access to quantopedia and have been chatting with Systemic Alpha here at Northeastern with the goal of properly backtesting some of this data, to see how off my numbers are. Considering I do not filter out stocks that stop trading because it would be unclear if they were bought or went under it is hard to know if the given results are valid.
+
+
+# Please, don't just clone and scrape!
+
+The ValueInvestorsClub is an amazing website. I don't want folks to scrape it more than necessary potentially causing unnecessary load to their servers and if I find this getting too much traffic I'll be taking the repo private.
+If you want the associated data please contact me @ schonholtz {dot} d {at} northeastern {dot} edu 
+
+
 # Running this tool
 - Run scraper after updating the date that is currently hardcoded into it. TODO MAKE IT A COMMAND LINE PARAM IF PUBLIC. Make sure to use the venv
     - python3 scraper.py
@@ -98,13 +139,13 @@ It's great, but I have a problem with resolving exchanges. I didn't capture coun
 
 I can fix this in a couple more days of scraping and updated my DB, but I would rather get done what I can even if it isn't perfect so I don't discover other things like this while sinking more work into a dataset.
 
-Some CSV's from here. They have a good mapping of US companies and their names to tickers.
+I pulled some additional CSV's from here. They have a good mapping of US companies, their names to tickers.
 https://datahub.io/core/nyse-other-listings
 
 I pushed that into numpy and lowercased all of the company names and tickers.
 
 Then I'll go through each company and find a company ticker that exists in one of my US csvs.
-Then I'll check the first word in company name exists somewhere in the associated ticker list from companies CSV.
+Then I'll check the first word in company name exists somewhere in the associated ticker list from companies CSV and partially matches the company name in the pricing data.
 
 If all of that checks out, then I'll look up each price for each of the days relative to the post day and add the performance metrics.
 
