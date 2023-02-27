@@ -20,9 +20,9 @@ This is a project to scrape and analyze the website www.ValueInvestorsClub.com. 
 
 # Results
 
-For a full breakdown of calculated results see the top level pricing.ipynb. It adds the pricing data to the SQLDB via SQLAlchemy, then does various forms of analysis on it, some of that analysis is discussed here.
+For a full breakdown of calculated results see the top level pricing.ipynb. It adds the pricing data to the SQL db via SQLAlchemy, then does various forms of analysis on it, some of that analysis is discussed here.
 
-To understand the data, you must understand the ValueInvestorsClub segments their investment ideas into several trackable buckets. Country of origin, short vs long, and contest winners. Where each idea represents a given tradable equity somewhere in the global market. Shorts are ideas where the thesis states the companies stock is expected to go down, and longs expect the company to go up. Contest winners are winners of the ValueInvestorClubs monthly contest of what is decided to be the best idea of the week. This is decided based on the estimated merit of the idea.
+To understand the data, you must understand how the ValueInvestorsClub segments their investment ideas into several trackable buckets, country of origin, short vs long, and contest winners. Where each idea represents a given tradable equity somewhere in the global market. Shorts are ideas where the thesis states the companies stock is expected to go down, and longs expect the company to go up normally on a basic of company value. Contest winners are winners of the ValueInvestorClubs weekly contest. This is decided based on the estimated merit, quality, and thoroughness of the investment pitch.
 
 Some basic stats, I scraped a total of 13656 ideas. Of those, I found matching US companies historical pricing data for 2370. This is because the majority of the ideas pitched are international. 
 
@@ -30,7 +30,7 @@ We can see the annualized median returns of all groups of investment ideas below
 
 ![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/AllReturns.png?raw=true)
 
-If we look at the median returns for all time frames and broken out across all groups of ideas, we see that the long contest winners aggressively are piled onto so much that the share price moves a disproportionate amount within the first weeks and month of an idea being posted. This seems to suggest that the ValueInvestorsClub moves the market. Also, since a contest winner is announced every week, there may be disproportionate alpha in investing in contest winners the second they are announced completely naively, and then selling one to two weeks later.
+If we look at the median returns for all time frames and broken out across all groups of ideas, we see that the long contest winners aggressively are piled onto so much that the share price moves a disproportionate amount within the first weeks and month of an idea being posted. This seems to suggest that the ValueInvestorsClub moves the market. Also, since a contest winner is announced every week, there may be disproportionate alpha in investing in contest winners the second they are announced completely naively, and then selling one to two weeks or months later.
 
 Many of the associated tickers stop being actively traded on account of going private, going bankrupt, getting acquired or some other reason for being de-listed.
 
@@ -40,17 +40,17 @@ We can see the percentage of companies that become de-listed x days after an ide
 
 It is interesting to see long positions get de-listed significantly more often than shorts. Presumably, this is because the long companies are attractive companies to acquire and the acquisition rate + going private rate is substantially higher than the number of companies going bankrupt. Therefore, these attractive companies get bought up and disappear at a higher rate than the companies which are recommended to be shorted by value investor club investors.
 
-There are extreme outliers that skew various average returns, but generally, medians seem representative of the various distributions.
+There are extreme outliers that skew various average returns, but generally, medians seem representative of the various distributions fairly well.
 
  Below are a few examples:
 
 ![Five year performance distribution, non-annualized](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/FiveYearLongPerf.png?raw=true)
 
-The above is the non-annualized total 5 year change in stock price for all of the companies that have data for it. Note the few outliers far out on the right tail.
+The above is the non-annualized total 5 year change in stock price for all of the companies that have data for them. Note the few outliers far out on the right tail.
 
 ![Five year short performance graph](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/FiveYearShortPerf.png?raw=true)
 
-The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one. We'll look at percentage gain later. We know a decent number of these companies would have gone under so and have been de-listed so this number will be artificially high. You also can see a stock that really hurt our average that had 2500% gains. 
+The above is the non-annualized percentage change in stock price for short positions. This is not profit! As short positions want values less than one. We'll look at percentage gain later. We know a decent number of these companies would have gone under and have been de-listed so this number will be artificially high. You also can see a stock really hurt our average that had 2500% gains. 
 
 ![Six Month Long Contest Winner Performance](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/SixMonthLongContestPerf.png?raw=true)
 
@@ -64,7 +64,10 @@ We can see the stark difference in performance when comparing the median perform
 
 ![Returns over various time periods for shorts, longs and contest winners](https://github.com/dschonholtz/ValueInvestorsClub/blob/main/pics/ShortAndLongReturns.png?raw=true)
 
-The biggest takeaways from this data are    
+The biggest takeaways from this data are the shorts only win when using the best ideas, contest winners, and even then they only return alpha for the first six months. It also suggests that the ValueInvestorsClub is moving the market, and that the best gains may be found investing quickly for very short periods of time rather than investing for long periods of time.
+
+This of course would need to be checked more thoroughly and isn't financial advice :)
+None of this is backtested and there are more interesting things to find! But it is a solid start for a weeks worth of work.
 
 
 # What's next?
@@ -155,7 +158,7 @@ The companies table is mapped as:
     company_name: Mapped[str] = mapped_column(String(128))
 
 The performance table is the only table I don't really like.
-I didn't want to bring in all of the assocated data of the 135,000 tickers that exist daily stock data or 
+I didn't want to bring in all of the assiocated data of the 135,000 tickers that exist daily stock data or 
     idea_id: Mapped[str] = mapped_column(ForeignKey("ideas.id"), primary_key=True)
     sameDayClose: Mapped[float] = mapped_column(Float)
     nextDayOpen: Mapped[float] = mapped_column(Float)
