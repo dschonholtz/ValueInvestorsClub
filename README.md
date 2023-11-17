@@ -1,9 +1,9 @@
-# Scraping and analyzing the Value Investors Club
+# Scraping and Analyzing the Value Investors Club
 
 This is a project to scrape and analyze the website www.ValueInvestorsClub.com. It is a great website full of thousands of investing ideas that outperform the market on average. This repository briefly scrapes and analyzes them.
 
 # Table Of Contents
-- [Scraping and analyzing the Value Investors Club](#scraping-and-analyzing-the-value-investors-club)
+- [Scraping and Analyzing the Value Investors Club](#scraping-and-analyzing-the-value-investors-club)
 - [Table Of Contents](#table-of-contents)
 - [Results](#results)
 - [What's next?](#whats-next)
@@ -66,6 +66,8 @@ We can see the stark difference in performance when comparing the median perform
 
 The biggest takeaways from this data are the shorts only win when using the best ideas, contest winners, and even then they only return alpha for the first six months. It also suggests that the ValueInvestorsClub is moving the market, and that the best gains may be found investing quickly for very short periods of time rather than investing for long periods of time.
 
+Specifically! It may be possible to get a 30% annualized return by simply buying all long ideas the second they are published and then selling a single week later.
+
 This of course would need to be checked more thoroughly and isn't financial advice :)
 None of this is backtested and there are more interesting things to find! But it is a solid start for a weeks worth of work.
 
@@ -82,7 +84,10 @@ None of this is backtested and there are more interesting things to find! But it
 # Please, don't just clone and scrape!
 
 The ValueInvestorsClub is an amazing website. I don't want folks to scrape it more than necessary potentially causing unnecessary load to their servers. If I find this getting too much traffic I'll be taking the repo private.
-If you want the associated data please contact me or just generally want to chat, contact me @ schonholtz {dot} d {at} northeastern {dot} edu 
+
+Please see connect to the DB image, on how to use the data.
+
+If you have any questions please contact me @ schonholtz {dot} d {at} northeastern {dot} edu
 
 
 # Running this tool
@@ -97,6 +102,27 @@ If you want the associated data please contact me or just generally want to chat
 # connect to the DB image with:
 
 `psql -U postgres -h localhost -p 5432`
+
+To get running with this data, I have dumped the data with the command
+
+`pg_dump -U postgres -h localhost -p 5432 ideas > VIC_IDEAS.sql`
+
+Password is just `postgres`
+
+Then you can run `docker-compose up` at the root level of this repo, then connect to the db with:
+
+`psql -U postgres -h localhost -p 5432`
+
+To load the data into your version of postgres after you have gotten postgres running locally, find the data here:
+
+https://drive.google.com/file/d/1XdHbJu35eyJdMoHMyycudDjyCvrEmIBW/view?usp=sharing
+
+Then you can load it into your running psql instance with:
+
+psql -U postgres -h localhost -p 5432 ideas < VIC_IDEAS.sql
+
+I have tested this flow on ubuntu 22.04, but presumably this dump should work any version of postgres and docker.
+
 
 # Structure:
 
