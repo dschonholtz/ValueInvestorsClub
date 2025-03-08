@@ -17,4 +17,4 @@ class Company(Base):
     company_name: Mapped[str] = mapped_column(String(128))
 
     def __repr__(self) -> str:
-        return f"id(id={self.id!r}, ticker={self.ticker!r}, companyName={self.company_name!r})"
+        return f"Company(ticker={self.ticker!r}, companyName={self.company_name!r})"

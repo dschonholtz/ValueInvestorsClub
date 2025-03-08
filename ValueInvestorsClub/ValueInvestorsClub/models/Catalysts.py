@@ -21,4 +21,4 @@ class Catalysts(Base):
     catalysts: Mapped[str] = mapped_column(String(4096))
 
     def __repr__(self) -> str:
-        return f"Catalysts(id={self.id!r}, catalysts={self.catalysts!r})"
+        return f"Catalysts(idea_id={self.idea_id!r}, catalysts={self.catalysts!r})"

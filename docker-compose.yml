@@ -6,10 +6,42 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=ideas
     ports:
       - '5432:5432'
     volumes: 
       - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      
+  api:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    restart: always
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@db/ideas
+    ports:
+      - '8000:8000'
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - '3000:80'
+    depends_on:
+      - api
+      
 volumes:
   db:
     driver: local

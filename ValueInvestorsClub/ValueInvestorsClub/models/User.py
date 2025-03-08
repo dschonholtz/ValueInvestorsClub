@@ -17,4 +17,4 @@ class User(Base):
     user_link: Mapped[str] = mapped_column(String(128), primary_key=True)
 
     def __repr__(self) -> str:
-        return f"User(id={self.id!r}, username={self.username!r}, userLink={self.user_link!r})"
+        return f"User(username={self.username!r}, userLink={self.user_link!r})"
