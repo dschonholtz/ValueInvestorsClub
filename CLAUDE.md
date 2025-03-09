@@ -30,7 +30,8 @@
   - Testing: `uv pip install <package> && uv pip freeze | grep <package> >> test-requirements.txt`
   - API-specific: `uv pip install <package> && uv pip freeze | grep <package> >> api/requirements.txt`
   - IMPORTANT: Always use the virtual environment (`.venv`) for consistent dependency management
-  - When installing for CI/CD: Use `--system` flag with uv (e.g., `uv pip install --system -r requirements.txt`)
+  - When installing locally for CI/CD with uv: Use `--system` flag with uv (e.g., `uv pip install --system -r requirements.txt`)
+  - When in Docker: Use regular pip without `--system` flag (e.g., `pip install -r requirements.txt`)
 
 ## Commands
 - Setup: `./install.sh` (installs dependencies with uv)
@@ -62,7 +63,13 @@
   
   - Docker-based Testing (preferred for CI/CD):
     - Unified Docker test runner: `./run_tests_docker.sh` (run all tests in Docker)
-      - Options: `--backend-only`, `--frontend-only`, `--e2e-only`, `--schema-only`
+      - Options: 
+        - `--lint-only`: Run only linting checks
+        - `--backend-only`: Run only backend tests
+        - `--frontend-only`: Run only frontend tests
+        - `--e2e-only`: Run only end-to-end tests
+        - `--schema-only`: Run only schema validation
+    - All tests run in Docker containers with correct dependencies
     - Skip production DB tests: Add `-k "not test_production_database_tables_exist"` to pytest commands
     - Test environment variables:
       - `SKIP_DB_VERIFY=true`: Skip database verification in tests

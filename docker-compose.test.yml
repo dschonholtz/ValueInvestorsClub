@@ -1,5 +1,27 @@
 version: '3.8'
 services:
+  python-lint:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    volumes:
+      - .:/app
+    command: >
+      sh -c "cd /app &&
+             pip install ruff mypy &&
+             ruff check . &&
+             mypy api/"
+
+  frontend-lint:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run lint
+
   test-db:
     image: postgres:14.1-alpine
     restart: always

@@ -9,6 +9,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Default to running all tests if no args provided
+RUN_PYTHON_LINT=true
+RUN_FRONTEND_LINT=true
 RUN_BACKEND=true
 RUN_FRONTEND=true
 RUN_E2E=true
@@ -18,7 +20,18 @@ RUN_SCHEMA=true
 while [[ $# -gt 0 ]]; do
     key="$1"
     case $key in
+        --lint-only)
+            RUN_PYTHON_LINT=true
+            RUN_FRONTEND_LINT=true
+            RUN_BACKEND=false
+            RUN_FRONTEND=false
+            RUN_E2E=false
+            RUN_SCHEMA=false
+            shift
+            ;;
         --backend-only)
+            RUN_PYTHON_LINT=false
+            RUN_FRONTEND_LINT=false
             RUN_BACKEND=true
             RUN_FRONTEND=false
             RUN_E2E=false
@@ -26,6 +39,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --frontend-only)
+            RUN_PYTHON_LINT=false
+            RUN_FRONTEND_LINT=false
             RUN_BACKEND=false
             RUN_FRONTEND=true
             RUN_E2E=false
@@ -33,6 +48,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --e2e-only)
+            RUN_PYTHON_LINT=false
+            RUN_FRONTEND_LINT=false
             RUN_BACKEND=false
             RUN_FRONTEND=false
             RUN_E2E=true
@@ -40,6 +57,8 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --schema-only)
+            RUN_PYTHON_LINT=false
+            RUN_FRONTEND_LINT=false
             RUN_BACKEND=false
             RUN_FRONTEND=false
             RUN_E2E=false
@@ -49,6 +68,7 @@ while [[ $# -gt 0 ]]; do
         --help)
             echo "Usage: $0 [options]"
             echo "Options:"
+            echo "  --lint-only       Run only linting (Python and frontend)"
             echo "  --backend-only    Run only backend tests"
             echo "  --frontend-only   Run only frontend tests"
             echo "  --e2e-only        Run only end-to-end tests"
@@ -91,6 +111,14 @@ docker-compose -f docker-compose.test.yml up -d test-db
 EXIT_CODE=0
 
 # Run tests based on flags
+if [ "$RUN_PYTHON_LINT" = true ]; then
+    run_test "Python Linting" "python-lint" || EXIT_CODE=1
+fi
+
+if [ "$RUN_FRONTEND_LINT" = true ]; then
+    run_test "Frontend Linting" "frontend-lint" || EXIT_CODE=1
+fi
+
 if [ "$RUN_BACKEND" = true ]; then
     run_test "Backend" "backend-tests" || EXIT_CODE=1
 fi
