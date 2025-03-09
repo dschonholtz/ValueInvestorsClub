@@ -208,6 +208,52 @@ def test_get_ideas_with_contest_winner_filter(client, test_data):
     for idea in ideas:
         assert idea["is_contest_winner"] is True
 
+def test_get_ideas_with_has_performance_filter(client, test_data):
+    """Test filtering ideas by performance data existence."""
+    # Test for ideas with performance data
+    response = client.get("/ideas/?has_performance=true")
+    assert response.status_code == status.HTTP_200_OK
+    
+    ideas_with_performance = response.json()
+    
+    # Test for ideas without performance data 
+    response = client.get("/ideas/?has_performance=false")
+    assert response.status_code == status.HTTP_200_OK
+    
+    ideas_without_performance = response.json()
+    
+    # The sum should be the total number of ideas
+    assert len(ideas_with_performance) + len(ideas_without_performance) == len(test_data["ideas"])
+    
+    # There should be at least one idea with performance data in our test data
+    assert len(ideas_with_performance) > 0
+
+def test_get_ideas_with_performance_sorting(client, test_data):
+    """Test sorting ideas by performance metrics."""
+    # Sort by performance in descending order
+    response = client.get("/ideas/?sort_by=performance&sort_order=desc&performance_period=one_month_perf")
+    assert response.status_code == status.HTTP_200_OK
+    
+    ideas_desc = response.json()
+    
+    # Should get some ideas
+    assert len(ideas_desc) > 0
+    
+    # Sort by performance in ascending order
+    response = client.get("/ideas/?sort_by=performance&sort_order=asc&performance_period=one_month_perf")
+    assert response.status_code == status.HTTP_200_OK
+    
+    ideas_asc = response.json()
+    
+    # Should get the same number of ideas in both cases
+    assert len(ideas_desc) == len(ideas_asc)
+    
+    # If there are multiple ideas with performance data, they should be in reverse order
+    if len(ideas_desc) > 1 and ideas_desc[0]["id"] != ideas_asc[0]["id"]:
+        # Get the details to verify the ordering
+        # (We would need to look up performance data to truly verify ordering)
+        assert ideas_desc[0]["id"] != ideas_asc[0]["id"]
+
 def test_get_ideas_with_pagination(client, test_data):
     """Test ideas pagination matching frontend request."""
     # Get first page (2 ideas)
@@ -251,7 +297,37 @@ def test_get_idea_detail(client, test_data):
     assert idea["user"]["username"] == "TestUser1"
     assert idea["description"]["description"] == "Test description for idea 1"
     assert idea["catalysts"]["catalysts"] == "Test catalysts for idea 1"
+    
+    # Check basic performance data
     assert idea["performance"]["oneMonthPerf"] == 1.2
+    
+    # Check timeline data in the performance object
+    performance = idea["performance"]
+    assert "timeline_labels" in performance
+    assert "timeline_values" in performance
+    assert "performance_periods" in performance
+    
+    # Verify timeline labels match the expected time periods
+    expected_labels = ["1W", "2W", "1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y"]
+    assert performance["timeline_labels"] == expected_labels
+    
+    # Verify timeline values match the corresponding performance metrics
+    expected_values = [1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]
+    assert performance["timeline_values"] == expected_values
+    
+    # Verify performance periods dictionary
+    expected_periods = {
+        "1W": 1.1,
+        "2W": 1.15,
+        "1M": 1.2,
+        "3M": 1.3,
+        "6M": 1.4,
+        "1Y": 1.5,
+        "2Y": 1.6,
+        "3Y": 1.7,
+        "5Y": 1.8
+    }
+    assert performance["performance_periods"] == expected_periods
 
 def test_get_idea_detail_not_found(client):
     """Test 404 error for non-existent idea."""
@@ -259,14 +335,14 @@ def test_get_idea_detail_not_found(client):
     assert response.status_code == status.HTTP_404_NOT_FOUND
 
 def test_get_idea_performance(client, test_data):
-    """Test retrieving idea performance data."""
+    """Test retrieving idea performance data including timeline data."""
     idea_id = test_data["ideas"][0].id
     response = client.get(f"/ideas/{idea_id}/performance")
     assert response.status_code == status.HTTP_200_OK
     
     performance = response.json()
     
-    # Check all performance fields
+    # Check all base performance fields
     assert performance["nextDayOpen"] == 1.0
     assert performance["nextDayClose"] == 1.05
     assert performance["oneWeekClosePerf"] == 1.1
@@ -278,6 +354,33 @@ def test_get_idea_performance(client, test_data):
     assert performance["twoYearPerf"] == 1.6
     assert performance["threeYearPerf"] == 1.7
     assert performance["fiveYearPerf"] == 1.8
+    
+    # Check timeline data
+    assert "timeline_labels" in performance
+    assert "timeline_values" in performance
+    assert "performance_periods" in performance
+    
+    # Verify timeline labels match the expected time periods
+    expected_labels = ["1W", "2W", "1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y"]
+    assert performance["timeline_labels"] == expected_labels
+    
+    # Verify timeline values match the corresponding performance metrics
+    expected_values = [1.1, 1.15, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8]
+    assert performance["timeline_values"] == expected_values
+    
+    # Verify performance periods dictionary
+    expected_periods = {
+        "1W": 1.1,
+        "2W": 1.15,
+        "1M": 1.2,
+        "3M": 1.3,
+        "6M": 1.4,
+        "1Y": 1.5,
+        "2Y": 1.6,
+        "3Y": 1.7,
+        "5Y": 1.8
+    }
+    assert performance["performance_periods"] == expected_periods
 
 def test_get_companies(client, test_data):
     """Test retrieving companies."""

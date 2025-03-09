@@ -59,6 +59,9 @@ class FrontendPerformanceType(BaseModel):
     twoYearPerf: Optional[float]
     threeYearPerf: Optional[float]
     fiveYearPerf: Optional[float]
+    timeline_labels: Optional[List[str]]
+    timeline_values: Optional[List[float]]
+    performance_periods: Optional[Dict[str, float]]
 
 class FrontendIdeaDetailType(FrontendIdeaType):
     company: Optional[FrontendCompanyType]
@@ -105,7 +108,20 @@ def test_performance_response_schema_compatibility():
         "oneYearPerf": 1.7,
         "twoYearPerf": 1.8,
         "threeYearPerf": 1.9,
-        "fiveYearPerf": 2.0
+        "fiveYearPerf": 2.0,
+        "timeline_labels": ["1W", "2W", "1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y"],
+        "timeline_values": [1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
+        "performance_periods": {
+            "1W": 1.2,
+            "2W": 1.3,
+            "1M": 1.4,
+            "3M": 1.5,
+            "6M": 1.6,
+            "1Y": 1.7,
+            "2Y": 1.8,
+            "3Y": 1.9,
+            "5Y": 2.0
+        }
     }
     
     # Validate with both schemas
@@ -193,7 +209,20 @@ def test_idea_detail_response_schema_compatibility():
             "oneYearPerf": 1.7,
             "twoYearPerf": 1.8,
             "threeYearPerf": 1.9,
-            "fiveYearPerf": 2.0
+            "fiveYearPerf": 2.0,
+            "timeline_labels": ["1W", "2W", "1M", "3M", "6M", "1Y", "2Y", "3Y", "5Y"],
+            "timeline_values": [1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0],
+            "performance_periods": {
+                "1W": 1.2,
+                "2W": 1.3,
+                "1M": 1.4,
+                "3M": 1.5,
+                "6M": 1.6,
+                "1Y": 1.7,
+                "2Y": 1.8,
+                "3Y": 1.9,
+                "5Y": 2.0
+            }
         }
     }
     

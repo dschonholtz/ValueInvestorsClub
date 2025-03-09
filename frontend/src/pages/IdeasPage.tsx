@@ -49,6 +49,37 @@ const IdeasPage: React.FC = () => {
       initialFilters.is_contest_winner = searchParams.get('is_contest_winner') === 'true';
     }
     
+    // Add performance filters from URL parameters
+    if (searchParams.has('has_performance')) {
+      initialFilters.has_performance = searchParams.get('has_performance') === 'true';
+    }
+    
+    if (searchParams.has('min_performance')) {
+      const minPerf = parseFloat(searchParams.get('min_performance') || '');
+      if (!isNaN(minPerf)) {
+        initialFilters.min_performance = minPerf;
+      }
+    }
+    
+    if (searchParams.has('max_performance')) {
+      const maxPerf = parseFloat(searchParams.get('max_performance') || '');
+      if (!isNaN(maxPerf)) {
+        initialFilters.max_performance = maxPerf;
+      }
+    }
+    
+    if (searchParams.has('performance_period')) {
+      initialFilters.performance_period = searchParams.get('performance_period') || undefined;
+    }
+    
+    if (searchParams.has('sort_by')) {
+      initialFilters.sort_by = searchParams.get('sort_by') || undefined;
+    }
+    
+    if (searchParams.has('sort_order')) {
+      initialFilters.sort_order = searchParams.get('sort_order') || undefined;
+    }
+    
     return initialFilters;
   };
 
@@ -148,8 +179,10 @@ const IdeasPage: React.FC = () => {
       
       {/* Filters */}
       <Box mb={6} p={4} borderWidth="1px" borderRadius="lg">
-        <Stack spacing={4} direction={{ base: 'column', md: 'row' }}>
+        {/* Basic Filters */}
+        <Stack spacing={6} direction={{ base: 'column', md: 'row' }} mb={4}>
           <Box flex="1">
+            <Text fontWeight="medium" mb={1}>Search</Text>
             <Input 
               placeholder="Search by company..." 
               value={searchQuery}
@@ -159,45 +192,198 @@ const IdeasPage: React.FC = () => {
             />
           </Box>
           
-          <Select 
-            placeholder="Position Type" 
-            width={{ base: '100%', md: '200px' }}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '') {
-                // Destructure to remove is_short but not use it directly
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { is_short, ...rest } = filters;
-                setFilters(rest);
-              } else {
-                handleFilterChange('is_short', value === 'short');
-              }
-            }}
-            data-testid="short-ideas-toggle"
-          >
-            <option value="long">Long</option>
-            <option value="short">Short</option>
-          </Select>
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Position Type</Text>
+            <Select 
+              width="100%"
+              value={filters.is_short !== undefined ? (filters.is_short ? 'short' : 'long') : 'all'}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'all') {
+                  // Destructure to remove is_short but not use it directly
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { is_short, ...rest } = filters;
+                  setFilters(rest);
+                } else {
+                  handleFilterChange('is_short', value === 'short');
+                }
+              }}
+              data-testid="short-ideas-toggle"
+            >
+              <option value="all">All</option>
+              <option value="long">Long</option>
+              <option value="short">Short</option>
+            </Select>
+          </Box>
           
-          <Select 
-            placeholder="Contest Winner" 
-            width={{ base: '100%', md: '200px' }}
-            onChange={(e) => {
-              const value = e.target.value;
-              if (value === '') {
-                // Destructure to remove is_contest_winner but not use it directly
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { is_contest_winner, ...rest } = filters;
-                setFilters(rest);
-              } else {
-                handleFilterChange('is_contest_winner', value === 'yes');
-              }
-            }}
-            data-testid="user-search"
-          >
-            <option value="yes">Yes</option>
-            <option value="no">No</option>
-          </Select>
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Contest Winner</Text>
+            <Select 
+              width="100%"
+              value={filters.is_contest_winner !== undefined ? (filters.is_contest_winner ? 'yes' : 'no') : 'all'}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'all') {
+                  // Destructure to remove is_contest_winner but not use it directly
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { is_contest_winner, ...rest } = filters;
+                  setFilters(rest);
+                } else {
+                  handleFilterChange('is_contest_winner', value === 'yes');
+                }
+              }}
+              data-testid="user-search"
+            >
+              <option value="all">All</option>
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </Select>
+          </Box>
+        </Stack>
+        
+        {/* Performance Filters */}
+        <Heading size="sm" mt={4} mb={2}>Performance Filters</Heading>
+        <Stack spacing={6} direction={{ base: 'column', md: 'row' }} mb={4}>
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Has Performance</Text>
+            <Select
+              width="100%"
+              value={filters.has_performance !== undefined ? (filters.has_performance ? 'true' : 'false') : 'all'}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'all') {
+                  // Destructure to remove has_performance
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { has_performance, ...rest } = filters;
+                  setFilters(rest);
+                } else {
+                  handleFilterChange('has_performance', value === 'true');
+                }
+              }}
+            >
+              <option value="all">All</option>
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </Select>
+          </Box>
+          
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Performance Period</Text>
+            <Select
+              width="100%"
+              value={filters.performance_period || 'one_year_perf'}
+              onChange={(e) => {
+                const value = e.target.value;
+                if (value === 'none') {
+                  // Destructure to remove performance_period
+                  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                  const { performance_period, ...rest } = filters;
+                  setFilters(rest);
+                } else {
+                  handleFilterChange('performance_period', value);
+                }
+              }}
+            >
+              <option value="one_week_perf">1 Week</option>
+              <option value="two_week_perf">2 Weeks</option>
+              <option value="one_month_perf">1 Month</option>
+              <option value="three_month_perf">3 Months</option>
+              <option value="six_month_perf">6 Months</option>
+              <option value="one_year_perf">1 Year</option>
+              <option value="two_year_perf">2 Years</option>
+              <option value="three_year_perf">3 Years</option>
+              <option value="five_year_perf">5 Years</option>
+            </Select>
+          </Box>
+          
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Min Performance (%)</Text>
+            <Input 
+              width="100%"
+              type="number"
+              value={filters.min_performance !== undefined ? filters.min_performance : ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleFilterChange('min_performance', value === '' ? undefined : parseFloat(value));
+              }}
+            />
+          </Box>
+          
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Max Performance (%)</Text>
+            <Input 
+              width="100%"
+              type="number"
+              value={filters.max_performance !== undefined ? filters.max_performance : ''}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleFilterChange('max_performance', value === '' ? undefined : parseFloat(value));
+              }}
+            />
+          </Box>
+        </Stack>
+        
+        {/* Sorting Options */}
+        <Heading size="sm" mb={2}>Sorting</Heading>
+        <Stack spacing={6} direction={{ base: 'column', md: 'row' }}>
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Sort By</Text>
+            <Select
+              width="100%" 
+              value={filters.sort_by || 'date'}
+              onChange={(e) => {
+                const value = e.target.value;
+                // If sorting by performance, ensure we have a performance_period set
+                if (value === 'performance' && !filters.performance_period) {
+                  handleFilterChange('performance_period', 'one_year_perf');
+                }
+                handleFilterChange('sort_by', value);
+              }}
+            >
+              <option value="date">Date</option>
+              <option value="performance">Performance</option>
+            </Select>
+          </Box>
+          
+          {/* Only show performance period selector when sorting by performance */}
+          {filters.sort_by === 'performance' && (
+            <Box width={{ base: '100%', md: '200px' }}>
+              <Text fontWeight="medium" mb={1}>Performance Period</Text>
+              <Select
+                width="100%"
+                value={filters.performance_period || 'one_year_perf'}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleFilterChange('performance_period', value);
+                }}
+              >
+                <option value="one_week_perf">1 Week</option>
+                <option value="two_week_perf">2 Weeks</option>
+                <option value="one_month_perf">1 Month</option>
+                <option value="three_month_perf">3 Months</option>
+                <option value="six_month_perf">6 Months</option>
+                <option value="one_year_perf">1 Year</option>
+                <option value="two_year_perf">2 Years</option>
+                <option value="three_year_perf">3 Years</option>
+                <option value="five_year_perf">5 Years</option>
+              </Select>
+            </Box>
+          )}
+          
+          <Box width={{ base: '100%', md: '200px' }}>
+            <Text fontWeight="medium" mb={1}>Sort Order</Text>
+            <Select
+              width="100%"
+              value={filters.sort_order || 'desc'}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleFilterChange('sort_order', value);
+              }}
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </Select>
+          </Box>
         </Stack>
       </Box>
       
@@ -218,7 +404,12 @@ const IdeasPage: React.FC = () => {
         <>
           <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={6}>
             {allIdeas.map((idea) => (
-              <IdeaCard key={idea.id} idea={idea} />
+              <IdeaCard 
+                key={idea.id} 
+                idea={idea}
+                // Don't pass performance prop - we'll let the card fetch its own performance data
+                // This keeps the list view light and doesn't require changes to the API
+              />
             ))}
           </SimpleGrid>
           

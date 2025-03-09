@@ -350,7 +350,7 @@
     "/ideas/{idea_id}/performance": {
       "get": {
         "summary": "Get Idea Performance",
-        "description": "Get performance metrics for a specific idea",
+        "description": "Get performance metrics for a specific idea including timeline data",
         "operationId": "get_idea_performance_ideas__idea_id__performance_get",
         "parameters": [
           {
@@ -856,6 +856,48 @@
               }
             ],
             "title": "Fiveyearperf"
+          },
+          "timeline_labels": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timeline Labels"
+          },
+          "timeline_values": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "number"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Timeline Values"
+          },
+          "performance_periods": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "number"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Performance Periods"
           }
         },
         "type": "object",

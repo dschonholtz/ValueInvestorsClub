@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query, Depends
-from sqlalchemy import create_engine, text, func
+from sqlalchemy import create_engine, text, func, or_, and_
 from sqlalchemy.orm import Session, joinedload
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime, date
@@ -40,8 +40,11 @@ def get_db():
 
 # Pydantic models for response serialization
 class PerformanceResponse(BaseModel):
+    # Base performance values
     nextDayOpen: Optional[float] = None
     nextDayClose: Optional[float] = None
+    
+    # Traditional performance metrics
     oneWeekClosePerf: Optional[float] = None
     twoWeekClosePerf: Optional[float] = None
     oneMonthPerf: Optional[float] = None
@@ -51,6 +54,15 @@ class PerformanceResponse(BaseModel):
     twoYearPerf: Optional[float] = None
     threeYearPerf: Optional[float] = None
     fiveYearPerf: Optional[float] = None
+    
+    # Timeline data for each performance period
+    # These could be used to create time-series visualizations
+    timeline_labels: Optional[List[str]] = None
+    timeline_values: Optional[List[float]] = None
+    
+    # Performance breakdown by time period with normalized values
+    # Useful for comparing across different time periods
+    performance_periods: Optional[Dict[str, float]] = None
 
     model_config = {"from_attributes": True}
 
@@ -114,15 +126,34 @@ def get_ideas(
     is_contest_winner: Optional[bool] = None,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None,
+    has_performance: Optional[bool] = None,
+    min_performance: Optional[float] = None,
+    max_performance: Optional[float] = None,
+    performance_period: str = Query("one_year_perf", description="Which performance period to filter/sort by"),
+    sort_by: str = Query("date", description="Field to sort by. Can be date or performance"),
+    sort_order: str = Query("desc", description="Sort order (asc or desc)"),
     db: Session = Depends(get_db),
 ):
     """
-    Get investment ideas with optional filtering
+    Get investment ideas with optional filtering and sorting by performance
     """
     try:
+        # Start with a query on Idea
         query = db.query(Idea)
-
-        # Apply filters
+        
+        # Determine if we need to join with Performance table
+        needs_performance_join = (
+            has_performance is not None or 
+            min_performance is not None or 
+            max_performance is not None or
+            sort_by == "performance"
+        )
+        
+        # Join with Performance if needed for filtering or sorting
+        if needs_performance_join:
+            query = query.outerjoin(Performance, Idea.id == Performance.idea_id)
+        
+        # Apply basic filters
         if company_id:
             query = query.filter(Idea.company_id == company_id)
         if user_id:
@@ -136,13 +167,77 @@ def get_ideas(
         if end_date:
             query = query.filter(func.date(Idea.date) <= end_date)
 
+        # Apply performance filters
+        if has_performance is not None:
+            if has_performance:
+                query = query.filter(Performance.idea_id.isnot(None))
+            else:
+                query = query.filter(or_(
+                    Performance.idea_id.is_(None),
+                    and_(
+                        # For filtering out ideas without any performance data where all metrics are null
+                        Performance.oneWeekClosePerf.is_(None),
+                        Performance.twoWeekClosePerf.is_(None),
+                        Performance.oneMonthPerf.is_(None),
+                        Performance.threeMonthPerf.is_(None),
+                        Performance.sixMonthPerf.is_(None),
+                        Performance.oneYearPerf.is_(None),
+                        Performance.twoYearPerf.is_(None),
+                        Performance.threeYearPerf.is_(None),
+                        Performance.fiveYearPerf.is_(None)
+                    )
+                ))
+        
+        # Map performance_period to database column
+        perf_column = None
+        if performance_period == "one_week_perf":
+            perf_column = Performance.oneWeekClosePerf
+        elif performance_period == "two_week_perf":
+            perf_column = Performance.twoWeekClosePerf
+        elif performance_period == "one_month_perf":
+            perf_column = Performance.oneMonthPerf
+        elif performance_period == "three_month_perf":
+            perf_column = Performance.threeMonthPerf
+        elif performance_period == "six_month_perf":
+            perf_column = Performance.sixMonthPerf
+        elif performance_period == "one_year_perf":
+            perf_column = Performance.oneYearPerf
+        elif performance_period == "two_year_perf":
+            perf_column = Performance.twoYearPerf
+        elif performance_period == "three_year_perf":
+            perf_column = Performance.threeYearPerf
+        elif performance_period == "five_year_perf":
+            perf_column = Performance.fiveYearPerf
+        else:
+            perf_column = Performance.oneYearPerf  # Default
+        
+        # Apply min/max performance filters if column is determined
+        if perf_column is not None:
+            if min_performance is not None:
+                query = query.filter(perf_column >= min_performance)
+            if max_performance is not None:
+                query = query.filter(perf_column <= max_performance)
+        
         # Ensure required fields are not NULL
         query = query.filter(Idea.id.isnot(None))
         query = query.filter(Idea.company_id.isnot(None))
         query = query.filter(Idea.user_id.isnot(None))
         query = query.filter(Idea.date.isnot(None))
         
-        ideas = query.order_by(Idea.date.desc()).offset(skip).limit(limit).all()
+        # Apply sorting
+        if sort_by == "performance" and perf_column is not None:
+            if sort_order.lower() == "asc":
+                query = query.order_by(perf_column.asc())
+            else:
+                query = query.order_by(perf_column.desc())
+        else:
+            # Default to date sorting
+            if sort_order.lower() == "asc":
+                query = query.order_by(Idea.date.asc())
+            else:
+                query = query.order_by(Idea.date.desc())
+        
+        ideas = query.offset(skip).limit(limit).all()
         
         # Create a list of valid response objects
         result = []
@@ -201,7 +296,8 @@ def get_idea_detail(idea_id: str, db: Session = Depends(get_db)):
         try:
             performance = db.query(Performance).filter(Performance.idea_id == idea_id).first()
             if performance:
-                result.performance = PerformanceResponse(
+                # Create base performance response with standard metrics
+                perf_response = PerformanceResponse(
                     nextDayOpen=performance.nextDayOpen,
                     nextDayClose=performance.nextDayClose,
                     oneWeekClosePerf=performance.oneWeekClosePerf,
@@ -214,6 +310,33 @@ def get_idea_detail(idea_id: str, db: Session = Depends(get_db)):
                     threeYearPerf=performance.threeYearPerf,
                     fiveYearPerf=performance.fiveYearPerf
                 )
+                
+                # Add timeline data
+                timeline_periods = [
+                    ("1W", performance.oneWeekClosePerf),
+                    ("2W", performance.twoWeekClosePerf),
+                    ("1M", performance.oneMonthPerf),
+                    ("3M", performance.threeMonthPerf),
+                    ("6M", performance.sixMonthPerf),
+                    ("1Y", performance.oneYearPerf),
+                    ("2Y", performance.twoYearPerf),
+                    ("3Y", performance.threeYearPerf),
+                    ("5Y", performance.fiveYearPerf)
+                ]
+                
+                # Filter out None values
+                valid_periods = [(label, value) for label, value in timeline_periods if value is not None]
+                
+                if valid_periods:
+                    perf_response.timeline_labels = [period[0] for period in valid_periods]
+                    perf_response.timeline_values = [period[1] for period in valid_periods]
+                    
+                    # Create performance periods dictionary
+                    perf_response.performance_periods = {
+                        period[0]: period[1] for period in valid_periods
+                    }
+                
+                result.performance = perf_response
         except Exception as e:
             # Log the error but continue
             print(f"Error loading performance data: {e}")
@@ -273,14 +396,14 @@ def get_users(
 @app.get("/ideas/{idea_id}/performance", response_model=PerformanceResponse)
 def get_idea_performance(idea_id: str, db: Session = Depends(get_db)):
     """
-    Get performance metrics for a specific idea
+    Get performance metrics for a specific idea including timeline data
     """
     try:
         performance = db.query(Performance).filter(Performance.idea_id == idea_id).first()
         if not performance:
             raise HTTPException(status_code=404, detail="Performance data not found")
         
-        # Create a response that explicitly maps the fields
+        # Get the core performance metrics
         response = PerformanceResponse(
             nextDayOpen=performance.nextDayOpen,
             nextDayClose=performance.nextDayClose,
@@ -294,6 +417,33 @@ def get_idea_performance(idea_id: str, db: Session = Depends(get_db)):
             threeYearPerf=performance.threeYearPerf,
             fiveYearPerf=performance.fiveYearPerf
         )
+        
+        # Create timeline data from the performance metrics
+        # Define the timeline periods and labels
+        timeline_periods = [
+            ("1W", performance.oneWeekClosePerf),
+            ("2W", performance.twoWeekClosePerf),
+            ("1M", performance.oneMonthPerf),
+            ("3M", performance.threeMonthPerf),
+            ("6M", performance.sixMonthPerf),
+            ("1Y", performance.oneYearPerf),
+            ("2Y", performance.twoYearPerf),
+            ("3Y", performance.threeYearPerf),
+            ("5Y", performance.fiveYearPerf)
+        ]
+        
+        # Filter out None values and create the timeline data
+        valid_periods = [(label, value) for label, value in timeline_periods if value is not None]
+        
+        if valid_periods:
+            response.timeline_labels = [period[0] for period in valid_periods]
+            response.timeline_values = [period[1] for period in valid_periods]
+            
+            # Create performance periods dictionary
+            response.performance_periods = {
+                period[0]: period[1] for period in valid_periods
+            }
+        
         return response
     except HTTPException:
         # Re-raise HTTP exceptions without modification
