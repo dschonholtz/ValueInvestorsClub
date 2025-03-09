@@ -176,6 +176,8 @@ def get_idea_detail(idea_id: str, db: Session = Depends(get_db)):
         )
         
         if not idea:
+            # Make sure the 404 is not caught by the general exception handler
+            print(f"Idea with ID {idea_id} not found")
             raise HTTPException(status_code=404, detail="Idea not found")
         
         # Ensure link is not None
@@ -217,9 +219,12 @@ def get_idea_detail(idea_id: str, db: Session = Depends(get_db)):
             print(f"Error loading performance data: {e}")
             
         return result
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
     except Exception as e:
         print(f"Error in get_idea_detail: {e}")
-        # Return a proper error response
+        # Return a proper error response for other exceptions
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
@@ -270,25 +275,32 @@ def get_idea_performance(idea_id: str, db: Session = Depends(get_db)):
     """
     Get performance metrics for a specific idea
     """
-    performance = db.query(Performance).filter(Performance.idea_id == idea_id).first()
-    if not performance:
-        raise HTTPException(status_code=404, detail="Performance data not found")
-    
-    # Create a response that explicitly maps the fields
-    response = PerformanceResponse(
-        nextDayOpen=performance.nextDayOpen,
-        nextDayClose=performance.nextDayClose,
-        oneWeekClosePerf=performance.oneWeekClosePerf,
-        twoWeekClosePerf=performance.twoWeekClosePerf,
-        oneMonthPerf=performance.oneMonthPerf,
-        threeMonthPerf=performance.threeMonthPerf,
-        sixMonthPerf=performance.sixMonthPerf,
-        oneYearPerf=performance.oneYearPerf,
-        twoYearPerf=performance.twoYearPerf,
-        threeYearPerf=performance.threeYearPerf,
-        fiveYearPerf=performance.fiveYearPerf
-    )
-    return response
+    try:
+        performance = db.query(Performance).filter(Performance.idea_id == idea_id).first()
+        if not performance:
+            raise HTTPException(status_code=404, detail="Performance data not found")
+        
+        # Create a response that explicitly maps the fields
+        response = PerformanceResponse(
+            nextDayOpen=performance.nextDayOpen,
+            nextDayClose=performance.nextDayClose,
+            oneWeekClosePerf=performance.oneWeekClosePerf,
+            twoWeekClosePerf=performance.twoWeekClosePerf,
+            oneMonthPerf=performance.oneMonthPerf,
+            threeMonthPerf=performance.threeMonthPerf,
+            sixMonthPerf=performance.sixMonthPerf,
+            oneYearPerf=performance.oneYearPerf,
+            twoYearPerf=performance.twoYearPerf,
+            threeYearPerf=performance.threeYearPerf,
+            fiveYearPerf=performance.fiveYearPerf
+        )
+        return response
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
+    except Exception as e:
+        print(f"Error in get_idea_performance: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/ideas/{idea_id}/description", response_model=DescriptionResponse)
@@ -296,13 +308,20 @@ def get_idea_description(idea_id: str, db: Session = Depends(get_db)):
     """
     Get the full description text for an idea
     """
-    description = db.query(Description).filter(Description.idea_id == idea_id).first()
-    if not description:
-        raise HTTPException(status_code=404, detail="Description not found")
-    
-    # Create a response that explicitly maps the fields
-    response = DescriptionResponse(description=description.description)
-    return response
+    try:
+        description = db.query(Description).filter(Description.idea_id == idea_id).first()
+        if not description:
+            raise HTTPException(status_code=404, detail="Description not found")
+        
+        # Create a response that explicitly maps the fields
+        response = DescriptionResponse(description=description.description)
+        return response
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
+    except Exception as e:
+        print(f"Error in get_idea_description: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/ideas/{idea_id}/catalysts", response_model=CatalystsResponse)
@@ -310,13 +329,20 @@ def get_idea_catalysts(idea_id: str, db: Session = Depends(get_db)):
     """
     Get the catalysts text for an idea
     """
-    catalysts = db.query(Catalysts).filter(Catalysts.idea_id == idea_id).first()
-    if not catalysts:
-        raise HTTPException(status_code=404, detail="Catalysts not found")
-    
-    # Create a response that explicitly maps the fields
-    response = CatalystsResponse(catalysts=catalysts.catalysts)
-    return response
+    try:
+        catalysts = db.query(Catalysts).filter(Catalysts.idea_id == idea_id).first()
+        if not catalysts:
+            raise HTTPException(status_code=404, detail="Catalysts not found")
+        
+        # Create a response that explicitly maps the fields
+        response = CatalystsResponse(catalysts=catalysts.catalysts)
+        return response
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
+    except Exception as e:
+        print(f"Error in get_idea_catalysts: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 # Health check endpoint
@@ -333,20 +359,27 @@ def debug_idea_detail(idea_id: str, db: Session = Depends(get_db)):
     """
     Simple debug endpoint to get an idea by ID
     """
-    idea = db.query(Idea).filter(Idea.id == idea_id).first()
-    if not idea:
-        raise HTTPException(status_code=404, detail="Idea not found")
-    
-    # Return just the idea data as a simple dict to test basic connectivity
-    return {
-        "id": idea.id,
-        "link": idea.link,
-        "company_id": idea.company_id,
-        "user_id": idea.user_id,
-        "date": idea.date.isoformat(),
-        "is_short": idea.is_short,
-        "is_contest_winner": idea.is_contest_winner
-    }
+    try:
+        idea = db.query(Idea).filter(Idea.id == idea_id).first()
+        if not idea:
+            raise HTTPException(status_code=404, detail="Idea not found")
+        
+        # Return just the idea data as a simple dict to test basic connectivity
+        return {
+            "id": idea.id,
+            "link": idea.link or "",
+            "company_id": idea.company_id,
+            "user_id": idea.user_id,
+            "date": idea.date.isoformat(),
+            "is_short": idea.is_short,
+            "is_contest_winner": idea.is_contest_winner
+        }
+    except HTTPException:
+        # Re-raise HTTP exceptions without modification
+        raise
+    except Exception as e:
+        print(f"Error in debug_idea_detail: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 if __name__ == "__main__":
