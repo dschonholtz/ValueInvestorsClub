@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Idea, IdeaDetail, Company, User, ListParams, Performance } from '../types/api';
 
-// Base API URL
+// Base API URL - Use environment variable with fallback
 const API_URL = '/api';
 
 // Create axios instance
@@ -11,6 +11,20 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add response interceptor for error handling
+apiClient.interceptors.response.use(
+  response => response,
+  error => {
+    // Enhance error object with more details if needed
+    if (error.response) {
+      error.message = `Server error: ${error.response.status} ${error.response.statusText || ''}`;
+    } else if (error.request) {
+      error.message = 'No response received from server. Please check your connection.';
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Ideas API
 export const ideasApi = {
@@ -43,7 +57,9 @@ export const ideasApi = {
 // Companies API
 export const companiesApi = {
   getCompanies: async (params: ListParams = {}): Promise<Company[]> => {
+    console.log('Getting companies with params:', params);
     const response = await apiClient.get('/companies/', { params });
+    console.log('Companies response:', response.data);
     return response.data;
   },
 };

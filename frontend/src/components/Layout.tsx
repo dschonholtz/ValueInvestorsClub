@@ -19,21 +19,26 @@ import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons';
 const Layout: React.FC = () => {
   const { isOpen, onToggle } = useDisclosure();
 
+  // Define common theme values
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const textColor = useColorModeValue('gray.600', 'white');
+  const borderColor = useColorModeValue('gray.200', 'gray.700');
+
   return (
     <Box minH="100vh">
       <Box
-        bg={useColorModeValue('white', 'gray.800')}
-        color={useColorModeValue('gray.600', 'white')}
+        bg={bgColor}
+        color={textColor}
         borderBottom={1}
         borderStyle="solid"
-        borderColor={useColorModeValue('gray.200', 'gray.700')}
+        borderColor={borderColor}
         position="sticky"
         top={0}
         zIndex={10}
       >
         <Flex
-          bg={useColorModeValue('white', 'gray.800')}
-          color={useColorModeValue('gray.600', 'white')}
+          bg={bgColor}
+          color={textColor}
           minH="60px"
           py={{ base: 2 }}
           px={{ base: 4 }}
@@ -106,7 +111,7 @@ const Layout: React.FC = () => {
         py={6}
         borderTop={1}
         borderStyle="solid"
-        borderColor={useColorModeValue('gray.200', 'gray.700')}
+        borderColor={borderColor}
       >
         <Container
           as={Stack}

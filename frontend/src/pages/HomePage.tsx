@@ -6,33 +6,9 @@ import {
   Text,
   Button,
   SimpleGrid,
-  Flex,
   Stack,
-  Image,
-  Container,
   useColorModeValue,
 } from '@chakra-ui/react';
-
-const Feature = ({ title, text, icon }: { title: string; text: string; icon: React.ReactElement }) => {
-  return (
-    <Stack>
-      <Flex
-        w={16}
-        h={16}
-        align={'center'}
-        justify={'center'}
-        color={'white'}
-        rounded={'full'}
-        bg={'blue.500'}
-        mb={1}
-      >
-        {icon}
-      </Flex>
-      <Text fontWeight={600}>{title}</Text>
-      <Text color={'gray.600'}>{text}</Text>
-    </Stack>
-  );
-};
 
 const HomePage: React.FC = () => {
   return (

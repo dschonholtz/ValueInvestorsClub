@@ -8,8 +8,6 @@ import {
   Flex,
   Grid,
   GridItem,
-  Stack,
-  Divider,
   Button,
   Spinner,
   Alert,
@@ -112,7 +110,7 @@ const IdeaDetailPage: React.FC = () => {
             </Text>
             <Text fontSize="sm" color="gray.600">
               by{' '}
-              <Link as={RouterLink} to={`/users/${user_id}`} color="blue.500">
+              <Link as={RouterLink} to={`/ideas?user_id=${user_id}`} color="blue.500">
                 {user?.username || user_id}
               </Link>
             </Text>

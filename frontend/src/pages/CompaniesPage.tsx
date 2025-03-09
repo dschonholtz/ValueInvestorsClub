@@ -18,7 +18,6 @@ import {
   Text,
   InputGroup,
   InputRightElement,
-  Link,
 } from '@chakra-ui/react';
 import { SearchIcon } from '@chakra-ui/icons';
 import { useCompanies } from '../hooks/useCompanies';

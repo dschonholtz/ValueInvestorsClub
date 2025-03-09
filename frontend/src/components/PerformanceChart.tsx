@@ -18,6 +18,15 @@ interface PerformanceChartProps {
 }
 
 const PerformanceChart: React.FC<PerformanceChartProps> = ({ performance, isShort }) => {
+  /**
+   * Format performance data for chart display
+   * 
+   * For short positions:
+   * - We invert the values to show returns from the perspective of the investor
+   * - A positive percentage in the database means the stock price went up, which is bad for shorts
+   * - A negative percentage in the database means the stock price went down, which is good for shorts
+   * - By inverting the values, positive bars indicate a successful investment
+   */
   const formatPerformanceData = () => {
     // Convert performance object to array for chart
     const data = [
@@ -33,7 +42,7 @@ const PerformanceChart: React.FC<PerformanceChartProps> = ({ performance, isShor
     ].filter((item) => item.value !== null);
 
     // For short positions, invert the values for visualization
-    // (negative returns are good for shorts)
+    // When a stock goes down (negative return), that's a positive result for shorts
     if (isShort) {
       return data.map(item => ({
         ...item,
