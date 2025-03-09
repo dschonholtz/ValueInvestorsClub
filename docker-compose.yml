@@ -10,13 +10,19 @@ services:
     ports:
       - '5432:5432'
     volumes: 
-      - db:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 10s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
       
   api:
     build:
@@ -32,6 +38,12 @@ services:
         condition: service_healthy
     volumes:
       - .:/app
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
       
   frontend:
     build:
@@ -42,7 +54,18 @@ services:
       - '3000:80'
     depends_on:
       - api
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
       
+# Using bind mounts instead of named volumes
 volumes:
-  db:
+  db_data:
     driver: local
+    driver_opts:
+      type: none
+      device: ./data/postgres
+      o: bind

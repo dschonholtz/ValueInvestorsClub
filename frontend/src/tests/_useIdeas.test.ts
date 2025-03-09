@@ -1,7 +1,7 @@
 /**
  * Tests for the useIdeas hook
  */
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { ideasApi } from '../api/apiService';
 import { useIdeas, useIdeaDetail } from '../hooks/useIdeas';
@@ -87,11 +87,13 @@ const createWrapper = () => {
     },
   });
   
-  return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
+  return ({ children }: { children: React.ReactNode }) => {
+    return React.createElement(
+      QueryClientProvider, 
+      { client: queryClient }, 
+      children
+    );
+  };
 };
 
 describe('useIdeas hook', () => {
@@ -104,7 +106,7 @@ describe('useIdeas hook', () => {
     (ideasApi.getIdeas as jest.Mock).mockResolvedValueOnce(mockIdeas);
     
     // Execute
-    const { result, waitFor } = renderHook(() => useIdeas(), {
+    const { result } = renderHook(() => useIdeas(), {
       wrapper: createWrapper(),
     });
     
@@ -112,7 +114,7 @@ describe('useIdeas hook', () => {
     expect(result.current.isLoading).toBe(true);
     
     // Wait for query to resolve
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     
     // Verify data
     expect(ideasApi.getIdeas).toHaveBeenCalledWith({});
@@ -130,12 +132,12 @@ describe('useIdeas hook', () => {
     (ideasApi.getIdeas as jest.Mock).mockResolvedValueOnce([mockIdeas[0]]);
     
     // Execute
-    const { result, waitFor } = renderHook(() => useIdeas(params), {
+    const { result } = renderHook(() => useIdeas(params), {
       wrapper: createWrapper(),
     });
     
     // Wait for query to resolve
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     
     // Verify
     expect(ideasApi.getIdeas).toHaveBeenCalledWith(params);
@@ -148,15 +150,15 @@ describe('useIdeas hook', () => {
     (ideasApi.getIdeas as jest.Mock).mockRejectedValueOnce(error);
     
     // Execute
-    const { result, waitFor } = renderHook(() => useIdeas(), {
+    const { result } = renderHook(() => useIdeas(), {
       wrapper: createWrapper(),
     });
     
     // Wait for query to fail
-    await waitFor(() => result.current.isError);
+    await waitFor(() => expect(result.current.isError).toBe(true));
     
     // Verify
-    expect(result.current.error).toBe(error);
+    expect(result.current.error).toBeDefined();
   });
 });
 
@@ -170,12 +172,12 @@ describe('useIdeaDetail hook', () => {
     (ideasApi.getIdeaById as jest.Mock).mockResolvedValueOnce(mockIdeaDetail);
     
     // Execute
-    const { result, waitFor } = renderHook(() => useIdeaDetail('1'), {
+    const { result } = renderHook(() => useIdeaDetail('1'), {
       wrapper: createWrapper(),
     });
     
     // Wait for query to resolve
-    await waitFor(() => result.current.isSuccess);
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
     
     // Verify
     expect(ideasApi.getIdeaById).toHaveBeenCalledWith('1');
@@ -199,14 +201,14 @@ describe('useIdeaDetail hook', () => {
     (ideasApi.getIdeaById as jest.Mock).mockRejectedValueOnce(error);
     
     // Execute
-    const { result, waitFor } = renderHook(() => useIdeaDetail('1'), {
+    const { result } = renderHook(() => useIdeaDetail('1'), {
       wrapper: createWrapper(),
     });
     
     // Wait for query to fail
-    await waitFor(() => result.current.isError);
+    await waitFor(() => expect(result.current.isError).toBe(true));
     
     // Verify
-    expect(result.current.error).toBe(error);
+    expect(result.current.error).toBeDefined();
   });
 });

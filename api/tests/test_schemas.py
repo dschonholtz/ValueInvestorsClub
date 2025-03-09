@@ -1,12 +1,16 @@
 """
-Tests to validate that API response schemas match the types expected by the frontend.
+Tests to validate that API response schemas match the types expected by the frontend
+and to ensure the database is properly set up.
 
-This ensures that contract changes are properly reflected on both sides.
+This ensures that contract changes are properly reflected on both sides and that
+the database tables necessary for the application to function are created.
 """
+import os
 import pytest
 from fastapi.testclient import TestClient
 from pydantic import BaseModel, ValidationError
 from typing import List, Optional, Dict, Any
+from sqlalchemy import inspect, create_engine
 
 # Import response models from main API
 from api.main import (
@@ -214,3 +218,59 @@ def test_idea_detail_response_schema_compatibility():
     
     for key in frontend_dict["performance"]:
         assert key in backend_dict["performance"], f"Field performance.{key} missing in backend model"
+
+def test_production_database_tables_exist():
+    """
+    Test that all required tables exist in the production database.
+    
+    This test verifies that the database has been properly initialized with all
+    required tables. It will fail if tables are missing, which would cause
+    'relation does not exist' errors in production.
+    
+    The test is skipped if the SKIP_DB_VERIFY environment variable is set.
+    """
+    if os.environ.get('SKIP_DB_VERIFY', '').lower() in ('true', '1', 't', 'yes'):
+        pytest.skip("Skipping production database verification due to SKIP_DB_VERIFY setting")
+
+    # Get database connection string from environment or use default
+    db_url = os.environ.get(
+        'DATABASE_URL', 
+        'postgresql+psycopg2://postgres:postgres@localhost:5432/ideas'
+    )
+    
+    try:
+        # Connect to the database
+        engine = create_engine(db_url)
+        inspector = inspect(engine)
+        
+        # List of required tables
+        required_tables = [
+            'ideas', 
+            'companies', 
+            'users', 
+            'descriptions', 
+            'catalyst', 
+            'performance'
+        ]
+        
+        # Get actual tables in the database
+        existing_tables = inspector.get_table_names()
+        
+        # Check if all required tables exist
+        missing_tables = [table for table in required_tables if table not in existing_tables]
+        
+        if missing_tables:
+            pytest.fail(f"Missing tables in production database: {', '.join(missing_tables)}.\n"
+                       f"Run ./startScript.sh to set up the database properly.")
+        
+        # Verify key columns in ideas table as an extra check
+        columns = {c['name'] for c in inspector.get_columns('ideas')}
+        required_columns = {'id', 'link', 'company_id', 'user_id', 'date', 'is_short', 'is_contest_winner'}
+        missing_columns = required_columns - columns
+        
+        if missing_columns:
+            pytest.fail(f"Missing columns in ideas table: {', '.join(missing_columns)}")
+            
+    except Exception as e:
+        pytest.fail(f"Failed to connect to the production database: {str(e)}.\n"
+                   f"Make sure the database is running and properly configured.")

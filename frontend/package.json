@@ -16,6 +16,7 @@
     "validate-schema": "ts-node src/types/schema-validator.ts"
   },
   "dependencies": {
+    "@chakra-ui/icons": "^2.2.4",
     "@chakra-ui/react": "^2.8.2",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
@@ -29,7 +30,7 @@
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.1.4",
-    "@testing-library/react": "^14.1.2",
+    "@testing-library/react": "^14.3.1",
     "@testing-library/user-event": "^14.5.1",
     "@types/jest": "^29.5.10",
     "@types/react": "^18.2.43",

@@ -14,6 +14,23 @@ NC='\033[0m' # No Color
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 cd "$SCRIPT_DIR"
 
+# Ensure virtual environment is activated
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    if [ ! -d ".venv" ]; then
+        echo -e "${YELLOW}Virtual environment not found. Creating one...${NC}"
+        uv venv .venv
+    fi
+    
+    echo -e "${YELLOW}Activating virtual environment...${NC}"
+    source .venv/bin/activate
+    
+    # Ensure dependencies are installed
+    if ! python -c "import pytest" &> /dev/null; then
+        echo -e "${YELLOW}Installing test dependencies...${NC}"
+        uv pip install -r test-requirements.txt
+    fi
+fi
+
 # Parse command line args
 BACKEND_ONLY=false
 FRONTEND_ONLY=false
@@ -93,7 +110,42 @@ if [ "$E2E_ONLY" = true ]; then
     fi
 fi
 
-# Note: Backend tests now use SQLite in-memory database, so no setup needed
+# Note: Backend tests use SQLite in-memory database, but we should also verify the production database
+
+# Step 2: Database verification
+if [ "$SCHEMA_ONLY" = false -a "$FRONTEND_ONLY" = false -a "$E2E_ONLY" = false ]; then
+    echo -e "${YELLOW}Verifying production database structure...${NC}"
+    
+    # Run just the database verification test
+    DB_VERIFY_RESULT=$(python -m pytest api/tests/test_schemas.py::test_production_database_tables_exist -v 2>&1)
+    DB_VERIFY_EXIT=$?
+    
+    if [ $DB_VERIFY_EXIT -ne 0 ]; then
+        echo -e "${RED}Production database verification failed.${NC}"
+        echo "$DB_VERIFY_RESULT" | grep -A 10 "FAILED"
+        echo -e "${YELLOW}The database might not be initialized properly. Run ./startScript.sh to set up the database.${NC}"
+        
+        # Ask user if they want to run the setup script
+        read -p "Do you want to run the database setup script now? (y/n) " -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}Running database setup script...${NC}"
+            ./startScript.sh
+            
+            # Verify again
+            echo -e "${YELLOW}Verifying database again...${NC}"
+            python -m pytest api/tests/test_schemas.py::test_production_database_tables_exist -v
+            if [ $? -ne 0 ]; then
+                echo -e "${RED}Database verification still failed after setup.${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${YELLOW}Skipping database setup. Tests may fail if database is not initialized.${NC}"
+        fi
+    else
+        echo -e "${GREEN}Production database verification passed.${NC}"
+    fi
+fi
 
 # Step 3: Backend tests
 if [ "$BACKEND_ONLY" = true ] || [ "$FRONTEND_ONLY" = false -a "$SCHEMA_ONLY" = false -a "$E2E_ONLY" = false ]; then

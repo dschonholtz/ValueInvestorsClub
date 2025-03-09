@@ -68,7 +68,7 @@ const Layout: React.FC = () => {
               as={RouterLink}
               to="/"
             >
-              ValueInvestorsClub
+              VIC Analytics Dashboard
             </Text>
 
             <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
@@ -122,7 +122,7 @@ const Layout: React.FC = () => {
           justify={{ base: 'center', md: 'space-between' }}
           align={{ base: 'center', md: 'center' }}
         >
-          <Text>© {new Date().getFullYear()} ValueInvestorsClub Dashboard. All rights reserved</Text>
+          <Text>© {new Date().getFullYear()} VIC Analytics Dashboard. Not affiliated with ValueInvestorsClub.com</Text>
         </Container>
       </Box>
     </Box>

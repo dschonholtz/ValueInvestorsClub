@@ -90,14 +90,65 @@ Please see connect to the DB image, on how to use the data.
 If you have any questions please contact me @ schonholtz {dot} d {at} northeastern {dot} edu
 
 
-# Running this tool
-- Run scraper after updating the date that is currently hardcoded into it. TODO MAKE IT A COMMAND LINE PARAM IF PUBLIC. Make sure to use the venv
-    - python3 scraper.py
-    - It will run for 200 clicks for 20 ideas per click. That's 4000 ideas. It may be worth making this a bit more command line driven.
-- Run process links to remove duplicate links
-    - python3 ProcessLinks.py
-- To dump those ideas into the DB run the spider which you do as with any scrapy project:
-    - scrapy crawl IdeaSpider
+# Development Setup
+
+## Environment Setup
+1. Create a Python virtual environment:
+   ```bash
+   uv venv .venv
+   ```
+
+2. Activate the virtual environment:
+   ```bash
+   source .venv/bin/activate
+   ```
+
+3. Install dependencies:
+   ```bash
+   # For production
+   uv pip install -r requirements.txt
+   
+   # For development/testing
+   uv pip install -r requirements-dev.txt
+   ```
+
+4. Start the database:
+   ```bash
+   docker-compose up -d
+   ```
+
+5. Initialize the database:
+   ```bash
+   ./startScript.sh
+   ```
+
+## Running the Application
+- API Server: 
+  ```bash
+  python -m api.main
+  ```
+- Web Interface:
+  ```bash
+  cd frontend && npm run dev
+  ```
+- Tests:
+  ```bash
+  ./run_tests.sh
+  ```
+
+## Running the Scraper Tools
+- Run scraper to collect links (Make sure to use the virtual environment):
+    ```bash
+    python scraper.py
+    ```
+- Process links to remove duplicates:
+    ```bash
+    python ProcessLinks.py
+    ```
+- Import data into database:
+    ```bash
+    scrapy crawl IdeaSpider
+    ```
 
 # connect to the DB image with:
 

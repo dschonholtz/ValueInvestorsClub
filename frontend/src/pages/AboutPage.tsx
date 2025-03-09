@@ -15,11 +15,15 @@ const AboutPage: React.FC = () => {
     <Box maxW="800px" mx="auto">
       <VStack spacing={8} align="start">
         <Box>
-          <Heading as="h1" size="xl" mb={4}>About ValueInvestorsClub Analytics</Heading>
-          <Text>
-            ValueInvestorsClub Analytics is a platform designed to provide insights and analysis
+          <Heading as="h1" size="xl" mb={4}>About VIC Analytics Dashboard</Heading>
+          <Text mb={3}>
+            VIC Analytics Dashboard is an independent platform designed to provide insights and analysis
             of investment ideas shared on ValueInvestorsClub.com. This tool allows you to explore
             investment theses, track performance metrics, and discover patterns in value investing strategies.
+          </Text>
+          <Text fontWeight="bold" color="blue.600">
+            IMPORTANT: This site is NOT affiliated with, endorsed by, or connected to ValueInvestorsClub.com in any official capacity.
+            It is an independent analytical tool for publicly available investment ideas.
           </Text>
         </Box>
 
@@ -70,10 +74,15 @@ const AboutPage: React.FC = () => {
 
         <Box>
           <Heading as="h2" size="lg" mb={4}>Disclaimer</Heading>
-          <Text>
+          <Text mb={3}>
             This platform is provided for informational and educational purposes only. It is not
             intended as investment advice, and should not be used as the basis for any investment decision.
             The performance metrics shown are based on historical data and do not guarantee future results.
+          </Text>
+          <Text fontWeight="medium" color="red.600">
+            This site is an independent analysis tool and is NOT affiliated with, endorsed by, sponsored by, or 
+            officially connected to ValueInvestorsClub.com. All ValueInvestorsClub content is used according to 
+            fair use principles for analysis and educational purposes.
           </Text>
         </Box>
 

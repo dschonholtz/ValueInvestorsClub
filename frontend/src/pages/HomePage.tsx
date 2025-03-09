@@ -22,11 +22,14 @@ const HomePage: React.FC = () => {
         textAlign="center"
       >
         <Heading as="h1" size="2xl" mb={4}>
-          ValueInvestorsClub Analytics
+          VIC Analytics Dashboard
         </Heading>
-        <Text fontSize="xl" maxW="3xl" mx="auto" mb={8}>
+        <Text fontSize="xl" maxW="3xl" mx="auto" mb={4}>
           Explore and analyze investment ideas from ValueInvestorsClub.com, tracking performance metrics
           and uncovering insights from top value investors.
+        </Text>
+        <Text fontSize="md" fontWeight="bold" color="blue.600" maxW="2xl" mx="auto" mb={8}>
+          This is an independent analysis tool not affiliated with ValueInvestorsClub.com
         </Text>
         <Stack direction={{ base: 'column', md: 'row' }} spacing={4} justify="center">
           <Button as={RouterLink} to="/ideas" size="lg" colorScheme="blue">
@@ -43,8 +46,8 @@ const HomePage: React.FC = () => {
         <Box p={5} shadow="md" borderWidth="1px" borderRadius="md">
           <Heading fontSize="xl" mb={4}>Investment Ideas Database</Heading>
           <Text>
-            Access a comprehensive collection of investment ideas shared on ValueInvestorsClub,
-            including both long and short positions.
+            Access a comprehensive collection of publicly available investment ideas from
+            ValueInvestorsClub.com, including both long and short positions.
           </Text>
           <Button as={RouterLink} to="/ideas" mt={4} colorScheme="blue" variant="outline">
             Browse Ideas

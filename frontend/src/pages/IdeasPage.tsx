@@ -155,6 +155,7 @@ const IdeasPage: React.FC = () => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              data-testid="company-search"
             />
           </Box>
           
@@ -172,6 +173,7 @@ const IdeasPage: React.FC = () => {
                 handleFilterChange('is_short', value === 'short');
               }
             }}
+            data-testid="short-ideas-toggle"
           >
             <option value="long">Long</option>
             <option value="short">Short</option>
@@ -191,6 +193,7 @@ const IdeasPage: React.FC = () => {
                 handleFilterChange('is_contest_winner', value === 'yes');
               }
             }}
+            data-testid="user-search"
           >
             <option value="yes">Yes</option>
             <option value="no">No</option>
@@ -227,6 +230,7 @@ const IdeasPage: React.FC = () => {
               isLoading={isLoading}
               loadingText="Loading..."
               isDisabled={ideas && ideas.length === 0} // Disable if no more ideas
+              data-testid="load-more-button"
             >
               {ideas && ideas.length === 0 ? "No More Ideas" : "Load More"}
             </Button>

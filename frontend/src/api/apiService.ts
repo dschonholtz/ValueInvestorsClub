@@ -12,17 +12,31 @@ const apiClient = axios.create({
   },
 });
 
+// Define custom error interface for better typing
+interface ApiError extends Error {
+  response?: any;
+  request?: any;
+}
+
 // Add response interceptor for error handling
 apiClient.interceptors.response.use(
   response => response,
   error => {
-    // Enhance error object with more details if needed
+    // Create a new error object with the enhanced message
+    const enhancedError = new Error() as ApiError;
+    
+    // Enhance error object with more details
     if (error.response) {
-      error.message = `Server error: ${error.response.status} ${error.response.statusText || ''}`;
+      enhancedError.message = `Server error: ${error.response.status} ${error.response.statusText || ''}`;
+      enhancedError.response = error.response;
     } else if (error.request) {
-      error.message = 'No response received from server. Please check your connection.';
+      enhancedError.message = 'No response received from server. Please check your connection.';
+      enhancedError.request = error.request;
+    } else {
+      enhancedError.message = error.message || 'An unknown error occurred';
     }
-    return Promise.reject(error);
+    
+    return Promise.reject(enhancedError);
   }
 );
 
@@ -57,9 +71,7 @@ export const ideasApi = {
 // Companies API
 export const companiesApi = {
   getCompanies: async (params: ListParams = {}): Promise<Company[]> => {
-    console.log('Getting companies with params:', params);
     const response = await apiClient.get('/companies/', { params });
-    console.log('Companies response:', response.data);
     return response.data;
   },
 };

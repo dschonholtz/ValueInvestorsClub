@@ -1,16 +1,49 @@
 # CLAUDE.md - Guide for ValueInvestorsClub Codebase
 
+## Environment Setup
+- Python Environment: 
+  - Note: `python` may be aliased to homebrew python, while `python3` may not be aliased
+  - Create virtual environment: `uv venv .venv` 
+  - Activate: `source .venv/bin/activate`
+  - Deactivate: `deactivate`
+
+## Service Ports
+- PostgreSQL Database: `5432` (default Postgres port)
+- FastAPI Backend: `8000` (default FastAPI port)
+- Frontend Web Server: `3000` (accessible in browser at http://localhost:3000)
+
+## Dependency Management
+- Core Requirements Files:
+  - `requirements.txt`: Core production dependencies
+  - `test-requirements.txt`: Testing dependencies
+  - `requirements-dev.txt`: Development tools (includes both other files)
+  
+- Installation Commands:
+  - Production only: `uv pip install -r requirements.txt`
+  - Test dependencies: `uv pip install -r test-requirements.txt`
+  - Full development setup: `uv pip install -r requirements-dev.txt`
+  
+- Adding New Dependencies:
+  - Production: `uv pip install <package> && uv pip freeze | grep <package> >> requirements.txt`
+  - Testing: `uv pip install <package> && uv pip freeze | grep <package> >> test-requirements.txt`
+  - IMPORTANT: Always use the virtual environment (`.venv`) for consistent dependency management
+
 ## Commands
 - Setup: `./install.sh` (installs dependencies with uv)
 - Package Management: 
   - `uv add <package>` (for adding to pyproject.toml)
   - `uv pip install <package>` (for direct installation)
-- Database: `docker-compose up` (starts PostgreSQL)
+- Docker:
+  - Start all services: `docker-compose up -d` (detached mode)
+  - Start specific service: `docker-compose up -d <service-name>` (e.g., db, api, frontend)
+  - Stop all services: `docker-compose down`
+  - View logs: `docker-compose logs -f <service-name>`
+  - Rebuild services: `docker-compose up -d --build`
 - Scraping: 
-  - `python3 scraper.py` (collect links)
-  - `python3 ProcessLinks.py` (process links)
+  - `python scraper.py` (collect links)
+  - `python ProcessLinks.py` (process links)
   - `scrapy crawl IdeaSpider` (scrape detailed data)
-- API: `python3 -m api.main` (start FastAPI server)
+- API: `python -m api.main` (start FastAPI server)
 - Database tools: `./startScript.sh` (setup/populate DB), `./describeSchema.sh` (view schema)
 - Testing:
   - Unified test runner: `./run_tests.sh` (run all tests)
@@ -18,11 +51,12 @@
   - Backend: `pytest -xvs api/tests/` (run backend tests)
   - Frontend: `cd frontend && npm test` (run frontend tests)
   - E2E: `cd frontend && npm run test:e2e` (run end-to-end tests)
-  - API Contract: `python3 -m api.validate_schema` (validate API schema)
+  - API Contract: `python -m api.validate_schema` (validate API schema)
   - Test database setup: `python -m api.tests.setup_test_db --drop` (recreate test database)
+  - Database Verification: `python -m pytest api/tests/test_schemas.py::test_production_database_tables_exist -v`
 
 ## Code Style
-- Dependency Management: Use uv and pyproject.toml for dependencies
+- Dependency Management: Use uv with requirements files for dependencies
 - Typing: Use type hints for all functions and SQLAlchemy column mappings
 - Naming: snake_case for variables/functions, CamelCase for classes
 - Imports: standard library → third-party → local modules
@@ -31,6 +65,7 @@
 - Documentation: Triple-quoted docstrings for functions/classes
 - ORM: Follow SQLAlchemy patterns for database models
 - API: Use FastAPI best practices with Pydantic models
+- Testing: All changes must pass existing tests; test failures are never acceptable
 
 ## Testing Strategy
 - Write tests before making changes to existing functionality
