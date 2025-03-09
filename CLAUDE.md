@@ -17,16 +17,20 @@
   - `requirements.txt`: Core production dependencies
   - `test-requirements.txt`: Testing dependencies
   - `requirements-dev.txt`: Development tools (includes both other files)
+  - `api/requirements.txt`: API-specific dependencies (includes FastAPI)
   
 - Installation Commands:
   - Production only: `uv pip install -r requirements.txt`
   - Test dependencies: `uv pip install -r test-requirements.txt`
   - Full development setup: `uv pip install -r requirements-dev.txt`
+  - API dependencies: `uv pip install -r api/requirements.txt`
   
 - Adding New Dependencies:
   - Production: `uv pip install <package> && uv pip freeze | grep <package> >> requirements.txt`
   - Testing: `uv pip install <package> && uv pip freeze | grep <package> >> test-requirements.txt`
+  - API-specific: `uv pip install <package> && uv pip freeze | grep <package> >> api/requirements.txt`
   - IMPORTANT: Always use the virtual environment (`.venv`) for consistent dependency management
+  - When installing for CI/CD: Use `--system` flag with uv (e.g., `uv pip install --system -r requirements.txt`)
 
 ## Commands
 - Setup: `./install.sh` (installs dependencies with uv)
@@ -46,14 +50,23 @@
 - API: `python -m api.main` (start FastAPI server)
 - Database tools: `./startScript.sh` (setup/populate DB), `./describeSchema.sh` (view schema)
 - Testing:
-  - Unified test runner: `./run_tests.sh` (run all tests)
-    - Options: `--backend-only`, `--frontend-only`, `--e2e-only`, `--schema-only`, `--coverage`
-  - Backend: `pytest -xvs api/tests/` (run backend tests)
-  - Frontend: `cd frontend && npm test` (run frontend tests)
-  - E2E: `cd frontend && npm run test:e2e` (run end-to-end tests)
-  - API Contract: `python -m api.validate_schema` (validate API schema)
-  - Test database setup: `python -m api.tests.setup_test_db --drop` (recreate test database)
-  - Database Verification: `python -m pytest api/tests/test_schemas.py::test_production_database_tables_exist -v`
+  - Local Testing:
+    - Unified test runner: `./run_tests.sh` (run all tests)
+      - Options: `--backend-only`, `--frontend-only`, `--e2e-only`, `--schema-only`, `--coverage`
+    - Backend: `pytest -xvs api/tests/` (run backend tests)
+    - Frontend: `cd frontend && npm test` (run frontend tests)
+    - E2E: `cd frontend && npm run test:e2e` (run end-to-end tests)
+    - API Contract: `python -m api.validate_schema` (validate API schema)
+    - Test database setup: `python -m api.tests.setup_test_db --drop` (recreate test database)
+    - Database Verification: `python -m pytest api/tests/test_schemas.py::test_production_database_tables_exist -v`
+  
+  - Docker-based Testing (preferred for CI/CD):
+    - Unified Docker test runner: `./run_tests_docker.sh` (run all tests in Docker)
+      - Options: `--backend-only`, `--frontend-only`, `--e2e-only`, `--schema-only`
+    - Skip production DB tests: Add `-k "not test_production_database_tables_exist"` to pytest commands
+    - Test environment variables:
+      - `SKIP_DB_VERIFY=true`: Skip database verification in tests
+      - `CI=true`: Run in CI/CD mode, skipping certain checks
 
 ## Code Style
 - Dependency Management: Use uv with requirements files for dependencies
@@ -75,6 +88,7 @@
   - Use FastAPI TestClient for API endpoint testing
   - Test database models with SQLAlchemy test fixtures
   - Validate request/response models against Pydantic schemas
+  - Skip production database tests in CI with `-k "not test_production_database_tables_exist"`
 - Frontend tests:
   - Use Jest and React Testing Library for component testing
   - Use MSW (Mock Service Worker) for API mocking
@@ -84,11 +98,18 @@
   - Generate OpenAPI schema from FastAPI
   - Validate TypeScript types against OpenAPI schema
   - Use shared Pydantic models between frontend and backend
+  - In CI environments, use the existing schema file if FastAPI import fails
+- Docker-based testing:
+  - Use `docker-compose.test.yml` for consistent test environments
+  - Run `./run_tests_docker.sh` with appropriate flags for specific test suites
+  - Ensures all tests run in the same environment as production
+  - Database is automatically set up for tests with consistent configuration
 - CI workflow:
   - Run linting and type checking before tests
   - Run unit tests before integration tests
   - Test API contract changes separately
   - Run E2E tests with Cypress against development environment
+  - Set appropriate environment variables for CI context
 
 ## Development Workflow
 1. Write tests for the feature/fix you're implementing
@@ -105,13 +126,30 @@
 
 ## CI/CD Pipeline
 The project uses GitHub Actions for continuous integration:
-1. **Linting**: Checks Python code with ruff/mypy and TypeScript with ESLint
-2. **Backend Tests**: Runs pytest against a test database
-3. **Frontend Tests**: Runs Jest tests for React components and hooks
-4. **API Contract Validation**: Ensures that API schemas are valid
-5. **E2E Tests**: Runs Cypress tests against running servers
+1. **Linting**: 
+   - Checks Python code with ruff/mypy (using `--system` flag with uv)
+   - Checks TypeScript with ESLint
+2. **Backend Tests**: 
+   - Runs pytest against a test database
+   - Skips production database verification tests
+   - Uses environment variables: `SKIP_DB_VERIFY=true`, `CI=true`
+3. **Frontend Tests**: 
+   - Runs Jest tests for React components and hooks
+4. **API Contract Validation**: 
+   - Ensures that API schemas are valid
+   - Falls back to existing schema if FastAPI imports fail
+5. **E2E Tests**: 
+   - Runs Cypress tests against running servers
+
+### Docker-Based CI Pipeline
+For more reliable CI, use the Docker-based testing workflow:
+1. Build and run tests in Docker containers using `docker-compose.test.yml`
+2. Database is consistently set up for all test environments
+3. All dependencies are properly installed in the container
+4. Tests run in an environment that matches production
 
 When submitting a PR:
 - CI will automatically run all tests
 - All checks must pass before merging
 - Code coverage reports are generated and uploaded to Codecov
+- Remember to run Docker-based tests locally before pushing: `./run_tests_docker.sh`

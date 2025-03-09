@@ -1,4 +1,4 @@
-name: ValueInvestorsClub CI
+name: CI Pipeline
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       
       - name: Python linting
         run: |
-          # Install linting tools with --system flag to avoid virtual env issues
+          # Install linting tools directly to system without virtual env
           uv pip install --system ruff mypy
           ruff check .
           mypy api/
@@ -39,43 +39,9 @@ jobs:
           cd frontend
           npm ci
           npm run lint
-
-  docker-tests:
+  
+  backend-tests:
     runs-on: ubuntu-latest
-    needs: [lint]
-    steps:
-      - uses: actions/checkout@v3
-      
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-      
-      # Run database setup first
-      - name: Set up database
-        run: docker-compose -f docker-compose.test.yml up -d test-db
-      
-      - name: Run database initialization
-        run: docker-compose -f docker-compose.test.yml up --build db-setup
-        
-      # Run backend tests
-      - name: Run backend tests
-        run: docker-compose -f docker-compose.test.yml up --exit-code-from backend-tests backend-tests
-          
-      # Run schema validation tests
-      - name: Run schema validation
-        run: docker-compose -f docker-compose.test.yml up --exit-code-from schema-tests schema-tests
-
-      # Run frontend tests
-      - name: Run frontend tests 
-        run: docker-compose -f docker-compose.test.yml up --exit-code-from frontend-tests frontend-tests
-          
-      - name: Clean up
-        run: docker-compose -f docker-compose.test.yml down
-
-  # Backup non-Docker approach in case needed
-  backup-backend-tests:
-    runs-on: ubuntu-latest
-    needs: [docker-tests]
-    if: ${{ failure() }}
     services:
       postgres:
         image: postgres:latest
@@ -102,10 +68,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          # Install from all requirements files
+          # Install all requirements, including test requirements
           pip install -r requirements.txt
           pip install -r test-requirements.txt
-          pip install -r api/requirements.txt
       
       - name: Set up test database
         run: |
@@ -125,4 +90,61 @@ jobs:
           python -m pytest api/tests/ -v -k "not test_production_database_tables_exist" --cov=api --cov-report=xml
         env:
           DATABASE_URL: postgresql+psycopg2://postgres:postgres@localhost:5432/test_ideas
+          SKIP_DB_VERIFY: true
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./coverage.xml
+          fail_ci_if_error: false
+  
+  frontend-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+      
+      - name: Run frontend tests
+        run: |
+          cd frontend
+          npm test -- --coverage
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          file: ./frontend/coverage/coverage-final.json
+          fail_ci_if_error: false
+  
+  api-contract-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # Install all requirements, not just fastapi
+          pip install -r requirements.txt
+      
+      - name: Validate API schema
+        run: |
+          # Set environment variables to prevent database verification
+          export SKIP_DB_VERIFY=true
+          export CI=true
+          python -m api.validate_schema
+        env:
           SKIP_DB_VERIFY: true

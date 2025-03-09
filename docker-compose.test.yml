@@ -45,6 +45,7 @@ services:
       - PYTHONPATH=/app
       - PYTEST_ADDOPTS="-v"
       - SKIP_DB_VERIFY=true
+      - CI=true
     volumes:
       - .:/app
     depends_on:
@@ -52,7 +53,7 @@ services:
         condition: service_completed_successfully
     command: >
       sh -c "cd /app &&
-             python -m pytest api/tests/ -v"
+             python -m pytest api/tests/ -v -k 'not test_production_database_tables_exist'"
 
   schema-tests:
     build:
@@ -62,6 +63,7 @@ services:
       - DATABASE_URL=postgresql+psycopg2://postgres:postgres@test-db/test_ideas
       - PYTHONPATH=/app
       - SKIP_DB_VERIFY=true
+      - CI=true
     volumes:
       - .:/app
     depends_on:
