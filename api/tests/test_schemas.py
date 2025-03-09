@@ -256,8 +256,10 @@ def test_production_database_tables_exist():
     required tables. It will fail if tables are missing, which would cause
     'relation does not exist' errors in production.
     
-    The test is skipped if the SKIP_DB_VERIFY environment variable is set.
+    The test is skipped if the SKIP_DB_VERIFY environment variable is set
+    or if we're using a test database.
     """
+    # Skip if explicitly told to do so
     if os.environ.get('SKIP_DB_VERIFY', '').lower() in ('true', '1', 't', 'yes'):
         pytest.skip("Skipping production database verification due to SKIP_DB_VERIFY setting")
 
@@ -266,6 +268,10 @@ def test_production_database_tables_exist():
         'DATABASE_URL', 
         'postgresql+psycopg2://postgres:postgres@localhost:5432/ideas'
     )
+    
+    # Skip if using a test database
+    if 'test_ideas' in db_url or 'test-db' in db_url:
+        pytest.skip("Skipping production database verification in test environment")
     
     try:
         # Connect to the database
