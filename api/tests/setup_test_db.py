@@ -21,9 +21,18 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(
 # Database settings
 DB_USER = os.environ.get('DB_USER', 'postgres')
 DB_PASSWORD = os.environ.get('DB_PASSWORD', 'postgres')
-DB_HOST = os.environ.get('DB_HOST', 'localhost')
+
+# Use 'test-db' as the host when running in a Docker container, otherwise use localhost
+is_docker = os.path.exists('/.dockerenv')
+DB_HOST = os.environ.get('DB_HOST', 'test-db' if is_docker else 'localhost')
 DB_PORT = os.environ.get('DB_PORT', '5432')
-DB_NAME = os.environ.get('TEST_DB_NAME', 'ideas_test')
+
+# Use the database name from DATABASE_URL if available
+database_url = os.environ.get('DATABASE_URL', '')
+if database_url and 'test_ideas' in database_url:
+    DB_NAME = 'test_ideas'
+else:
+    DB_NAME = os.environ.get('TEST_DB_NAME', 'ideas_test')
 
 # PostgreSQL connection string for administrative access (connecting to 'postgres' database)
 ADMIN_DB_URL = f"postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/postgres"

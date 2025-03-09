@@ -19,7 +19,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 COPY . /app/
 
 # Install Python dependencies
-RUN pip install fastapi uvicorn sqlalchemy psycopg2-binary pydantic
+RUN pip install -r requirements.txt -r test-requirements.txt
 
 # Set environment variables
 ENV PYTHONPATH=/app
