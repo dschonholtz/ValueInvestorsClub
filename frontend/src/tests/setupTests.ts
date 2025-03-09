@@ -35,5 +35,23 @@ console.error = (...args) => {
   ) {
     return;
   }
+  
+  // Ignore React Query error messages in tests
+  if (args[0] instanceof Error && 
+      (args[0].message === 'Failed to fetch ideas' || 
+       args[0].message === 'Failed to fetch idea detail')) {
+    return;
+  }
+  
+  // Silence React act(...) warnings in tests
+  if (
+    args[0] && 
+    typeof args[0] === 'string' && 
+    args[0].includes('Warning: An update to') && 
+    args[0].includes('inside a test was not wrapped in act')
+  ) {
+    return;
+  }
+  
   originalConsoleError(...args);
 };

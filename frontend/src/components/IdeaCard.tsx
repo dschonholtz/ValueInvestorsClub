@@ -13,20 +13,28 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea }) => {
   const { id, company_id, user_id, date, is_short, is_contest_winner } = idea;
   
   // Search by ticker/name instead of company_id
-  const { data: companies } = useQuery<Company[]>(
+  const { data: companies, isLoading: isCompanyLoading } = useQuery<Company[]>(
     ['company-search', company_id],
     () => companiesApi.getCompanies({ search: company_id }),
-    { enabled: !!company_id }
+    { 
+      enabled: !!company_id,
+      staleTime: 60000, // Cache results for 1 minute to reduce flickering
+      cacheTime: 300000 // Keep in cache for 5 minutes
+    }
   );
   
   // Get the first company if multiple are returned
   const company = companies && companies.length > 0 ? companies[0] : null;
 
   // Search by username instead of user_id
-  const { data: users } = useQuery<User[]>(
+  const { data: users, isLoading: isUserLoading } = useQuery<User[]>(
     ['user-search', user_id],
     () => usersApi.getUsers({ search: user_id }),
-    { enabled: !!user_id }
+    { 
+      enabled: !!user_id,
+      staleTime: 60000, // Cache results for 1 minute to reduce flickering
+      cacheTime: 300000 // Keep in cache for 5 minutes
+    }
   );
   
   // Get the first user if multiple are returned
@@ -46,20 +54,21 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea }) => {
       overflow="hidden"
       _hover={{ boxShadow: 'md', transform: 'translateY(-2px)' }}
       transition="all 0.2s"
+      data-testid="idea-card"
     >
       <Flex justifyContent="space-between" alignItems="center">
         <Heading size="md">
           <Link as={RouterLink} to={`/ideas/${id}`} _hover={{ textDecoration: 'none' }}>
-            {company ? (
-              <>
-                {company.company_name || company_id} 
-                {company.ticker && <span>({company.ticker})</span>}
-              </>
-            ) : (
-              <Skeleton isLoaded={!!companies}>
-                {company_id}
-              </Skeleton>
-            )}
+            <Skeleton isLoaded={!isCompanyLoading} startColor="gray.100" endColor="gray.300" display="inline">
+              {company ? (
+                <>
+                  {company.company_name || company_id} 
+                  {company.ticker && <span>({company.ticker})</span>}
+                </>
+              ) : (
+                company_id
+              )}
+            </Skeleton>
           </Link>
         </Heading>
         <HStack spacing={2}>
@@ -76,13 +85,9 @@ const IdeaCard: React.FC<IdeaCardProps> = ({ idea }) => {
         <Text>Posted: {formattedDate}</Text>
         <Text mx={2}>|</Text>
         <Link as={RouterLink} to={`/ideas?user_id=${user_id}`}>
-          {user ? (
-            user.username || user_id
-          ) : (
-            <Skeleton isLoaded={!!user}>
-              {user_id}
-            </Skeleton>
-          )}
+          <Skeleton isLoaded={!isUserLoading} startColor="gray.100" endColor="gray.300" display="inline">
+            {user ? user.username || user_id : user_id}
+          </Skeleton>
         </Link>
       </Flex>
     </Box>

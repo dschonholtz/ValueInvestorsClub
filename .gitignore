@@ -33,6 +33,8 @@ ValueInvestorsClub/__pycache__
 *.sqlite3
 *.db
 VIC_IDEAS.sql
+data/
+data/postgres/
 
 # Logs
 *.log
@@ -49,6 +51,8 @@ htmlcov/
 nosetests.xml
 coverage.xml
 *.cover
+frontend/cypress/screenshots/
+frontend/cypress/videos/
 
 # Environment variables
 .env
