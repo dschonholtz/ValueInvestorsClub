@@ -6,7 +6,7 @@ import os
 import sys
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
 # Add the root directory to the Python path
@@ -14,7 +14,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../.
 
 # Import models and app
 from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
-from api.main import app, get_db
+from api.main import app 
+from api.database import get_db
 
 # Use in-memory SQLite for tests
 @pytest.fixture(scope="session")

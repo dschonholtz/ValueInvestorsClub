@@ -6,10 +6,27 @@
     "version": "1.0.0"
   },
   "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint.\nReturns a simple response indicating that the API is healthy.",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
     "/ideas/": {
       "get": {
         "summary": "Get Ideas",
-        "description": "Get investment ideas with optional filtering",
+        "description": "Get investment ideas with optional filtering and sorting by performance.",
         "operationId": "get_ideas_ideas__get",
         "parameters": [
           {
@@ -131,6 +148,90 @@
               ],
               "title": "End Date"
             }
+          },
+          {
+            "name": "has_performance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Has Performance"
+            }
+          },
+          {
+            "name": "min_performance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Performance"
+            }
+          },
+          {
+            "name": "max_performance",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Performance"
+            }
+          },
+          {
+            "name": "performance_period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Which performance period to filter/sort by",
+              "default": "one_year_perf",
+              "title": "Performance Period"
+            },
+            "description": "Which performance period to filter/sort by"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Field to sort by. Can be date or performance",
+              "default": "date",
+              "title": "Sort By"
+            },
+            "description": "Field to sort by. Can be date or performance"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort order (asc or desc)",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order (asc or desc)"
           }
         ],
         "responses": {
@@ -164,7 +265,7 @@
     "/ideas/{idea_id}": {
       "get": {
         "summary": "Get Idea Detail",
-        "description": "Get complete details for a specific idea including related data",
+        "description": "Get complete details for a specific idea including related data.",
         "operationId": "get_idea_detail_ideas__idea_id__get",
         "parameters": [
           {
@@ -185,6 +286,164 @@
                 "schema": {
                   "$ref": "#/components/schemas/IdeaDetailResponse"
                 }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideas/{idea_id}/performance": {
+      "get": {
+        "summary": "Get Idea Performance",
+        "description": "Get performance metrics for a specific idea including timeline data.",
+        "operationId": "get_idea_performance_ideas__idea_id__performance_get",
+        "parameters": [
+          {
+            "name": "idea_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Idea Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PerformanceResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideas/{idea_id}/description": {
+      "get": {
+        "summary": "Get Idea Description",
+        "description": "Get the full description text for an idea.",
+        "operationId": "get_idea_description_ideas__idea_id__description_get",
+        "parameters": [
+          {
+            "name": "idea_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Idea Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DescriptionResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/ideas/{idea_id}/catalysts": {
+      "get": {
+        "summary": "Get Idea Catalysts",
+        "description": "Get the catalysts text for an idea.",
+        "operationId": "get_idea_catalysts_ideas__idea_id__catalysts_get",
+        "parameters": [
+          {
+            "name": "idea_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Idea Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CatalystsResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/debug/ideas/{idea_id}": {
+      "get": {
+        "summary": "Debug Idea Detail",
+        "description": "Simple debug endpoint to get an idea by ID.",
+        "operationId": "debug_idea_detail_debug_ideas__idea_id__get",
+        "parameters": [
+          {
+            "name": "idea_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Idea Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
               }
             }
           },
@@ -346,181 +605,6 @@
           }
         }
       }
-    },
-    "/ideas/{idea_id}/performance": {
-      "get": {
-        "summary": "Get Idea Performance",
-        "description": "Get performance metrics for a specific idea including timeline data",
-        "operationId": "get_idea_performance_ideas__idea_id__performance_get",
-        "parameters": [
-          {
-            "name": "idea_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Idea Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PerformanceResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ideas/{idea_id}/description": {
-      "get": {
-        "summary": "Get Idea Description",
-        "description": "Get the full description text for an idea",
-        "operationId": "get_idea_description_ideas__idea_id__description_get",
-        "parameters": [
-          {
-            "name": "idea_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Idea Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DescriptionResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/ideas/{idea_id}/catalysts": {
-      "get": {
-        "summary": "Get Idea Catalysts",
-        "description": "Get the catalysts text for an idea",
-        "operationId": "get_idea_catalysts_ideas__idea_id__catalysts_get",
-        "parameters": [
-          {
-            "name": "idea_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Idea Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CatalystsResponse"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/health": {
-      "get": {
-        "summary": "Health Check",
-        "description": "Health check endpoint",
-        "operationId": "health_check_health_get",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          }
-        }
-      }
-    },
-    "/debug/ideas/{idea_id}": {
-      "get": {
-        "summary": "Debug Idea Detail",
-        "description": "Simple debug endpoint to get an idea by ID",
-        "operationId": "debug_idea_detail_debug_ideas__idea_id__get",
-        "parameters": [
-          {
-            "name": "idea_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Idea Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      }
     }
   },
   "components": {
@@ -536,7 +620,8 @@
         "required": [
           "catalysts"
         ],
-        "title": "CatalystsResponse"
+        "title": "CatalystsResponse",
+        "description": "Catalysts for an investment idea."
       },
       "CompanyResponse": {
         "properties": {
@@ -554,7 +639,8 @@
           "ticker",
           "company_name"
         ],
-        "title": "CompanyResponse"
+        "title": "CompanyResponse",
+        "description": "Company information."
       },
       "DescriptionResponse": {
         "properties": {
@@ -567,7 +653,8 @@
         "required": [
           "description"
         ],
-        "title": "DescriptionResponse"
+        "title": "DescriptionResponse",
+        "description": "Description of an investment idea."
       },
       "HTTPValidationError": {
         "properties": {
@@ -681,7 +768,8 @@
           "is_short",
           "is_contest_winner"
         ],
-        "title": "IdeaDetailResponse"
+        "title": "IdeaDetailResponse",
+        "description": "Detailed information about an investment idea, including related data."
       },
       "IdeaResponse": {
         "properties": {
@@ -732,7 +820,8 @@
           "is_short",
           "is_contest_winner"
         ],
-        "title": "IdeaResponse"
+        "title": "IdeaResponse",
+        "description": "Basic information about an investment idea."
       },
       "PerformanceResponse": {
         "properties": {
@@ -901,7 +990,8 @@
           }
         },
         "type": "object",
-        "title": "PerformanceResponse"
+        "title": "PerformanceResponse",
+        "description": "Performance metrics for an investment idea."
       },
       "UserResponse": {
         "properties": {
@@ -919,7 +1009,8 @@
           "username",
           "user_link"
         ],
-        "title": "UserResponse"
+        "title": "UserResponse",
+        "description": "User information."
       },
       "ValidationError": {
         "properties": {

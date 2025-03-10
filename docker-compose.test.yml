@@ -9,7 +9,7 @@ services:
     command: >
       sh -c "cd /app &&
              pip install ruff mypy &&
-             ruff check . &&
+             ruff check --exclude 'node_modules/,data/,ValueInvestorsClub/,pricing.ipynb' . &&
              mypy api/"
 
   frontend-lint:

@@ -3,7 +3,8 @@
 // ***********************************************
 
 // -- This is a parent command --
-Cypress.Commands.add('login', (username: string, password: string) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+Cypress.Commands.add('login', (_username: string, _password: string) => {
   // Login implementation (if/when needed)
 });
 
@@ -18,12 +19,13 @@ Cypress.Commands.add('getByTestId', (testId) => {
 });
 
 // -- Type declarations for custom commands --
+// Using interface merging instead of namespace
 declare global {
-  namespace Cypress {
-    interface Chainable {
-      login(username: string, password: string): Chainable<void>;
-      findByTestId(testId: string): Chainable<JQuery<HTMLElement>>;
-      getByTestId(testId: string): Chainable<JQuery<HTMLElement>>;
+  interface Cypress {
+    Chainable: {
+      login(username: string, password: string): Cypress.Chainable<void>;
+      findByTestId(testId: string): Cypress.Chainable<JQuery<HTMLElement>>;
+      getByTestId(testId: string): Cypress.Chainable<JQuery<HTMLElement>>;
     }
   }
 }

@@ -14,8 +14,12 @@ const apiClient = axios.create({
 
 // Define custom error interface for better typing
 interface ApiError extends Error {
-  response?: any;
-  request?: any;
+  response?: {
+    status: number;
+    statusText?: string;
+    data?: unknown;
+  };
+  request?: unknown;
 }
 
 // Add response interceptor for error handling

@@ -11,11 +11,8 @@ import sys
 import os
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
 from ValueInvestorsClub.ValueInvestorsClub.models.Idea import Idea
-from ValueInvestorsClub.ValueInvestorsClub.models.Company import Company
 from ValueInvestorsClub.ValueInvestorsClub.models.Description import Description
-from ValueInvestorsClub.ValueInvestorsClub.models.User import User
 from ValueInvestorsClub.ValueInvestorsClub.models.Catalysts import Catalysts
 from ValueInvestorsClub.ValueInvestorsClub.models.Performance import Performance
 
@@ -61,7 +58,8 @@ def test_get_idea_detail(idea_id):
             # Try to construct response - this will help identify serialization issues
             try:
                 print("Attempting to create a response dictionary manually:")
-                response = {
+                # Create and print the response to use the variable
+                test_response = {
                     "id": idea.id,
                     "link": idea.link,
                     "company_id": idea.company_id,
@@ -89,7 +87,7 @@ def test_get_idea_detail(idea_id):
                         # Add other performance fields as needed
                     } if performance else None
                 }
-                print("Successfully created response dictionary")
+                print(f"Successfully created response dictionary: {test_response['id']}")
             except Exception as e:
                 print(f"Error creating response dictionary: {e}")
                 traceback.print_exc()

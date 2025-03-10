@@ -10,7 +10,6 @@ Usage:
 """
 import os
 import sys
-import subprocess
 import argparse
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import ProgrammingError, OperationalError
@@ -90,7 +89,6 @@ def create_test_database():
 def initialize_test_database():
     """Initialize the test database with schema and test data."""
     from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
-    from api.tests.test_ideas_api import test_data  # Import the test data fixture
     
     # Create engine for the test database
     engine = create_engine(TEST_DB_URL)

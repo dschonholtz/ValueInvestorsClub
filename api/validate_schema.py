@@ -12,28 +12,31 @@ import sys
 import os
 from pathlib import Path
 from typing import Dict, Any, Optional
+from fastapi import FastAPI
 
 # Add project root to path for imports
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Try to import the FastAPI app, but handle potential import errors gracefully
 # This allows the script to run even if dependencies aren't available (like in CI/CD)
+
+app: Optional[FastAPI] = None
+HAS_FASTAPI = False
+
 try:
     from api.main import app
     HAS_FASTAPI = True
 except ImportError as e:
     print(f"Warning: Could not import FastAPI app: {e}")
     print("Running in limited mode - will use existing schema file if available")
-    app = None
-    HAS_FASTAPI = False
 
 def generate_openapi_schema() -> Optional[Dict[str, Any]]:
     """Generate OpenAPI schema from FastAPI app."""
-    if not HAS_FASTAPI:
+    if not HAS_FASTAPI or app is None:
         return None
     return app.openapi()
 
-def load_schema_from_file(file_path: str) -> Optional[Dict[str, Any]]:
+def load_schema_from_file(file_path: Path) -> Optional[Dict[str, Any]]:
     """Load OpenAPI schema from file."""
     try:
         with open(file_path, "r") as f:
@@ -42,7 +45,7 @@ def load_schema_from_file(file_path: str) -> Optional[Dict[str, Any]]:
         print(f"Error loading schema file: {e}")
         return None
 
-def write_schema_to_file(schema: Dict[str, Any], file_path: str) -> None:
+def write_schema_to_file(schema: Dict[str, Any], file_path: Path) -> None:
     """Write OpenAPI schema to file."""
     with open(file_path, "w") as f:
         json.dump(schema, f, indent=2)

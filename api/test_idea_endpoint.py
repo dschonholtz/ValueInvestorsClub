@@ -7,7 +7,7 @@ import os
 import traceback
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional, Dict, Any, List
+from typing import Optional
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,11 +16,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, joinedload
 
 # Import models
-from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
 from ValueInvestorsClub.ValueInvestorsClub.models.Idea import Idea
-from ValueInvestorsClub.ValueInvestorsClub.models.Company import Company
 from ValueInvestorsClub.ValueInvestorsClub.models.Description import Description
-from ValueInvestorsClub.ValueInvestorsClub.models.User import User
 from ValueInvestorsClub.ValueInvestorsClub.models.Catalysts import Catalysts
 from ValueInvestorsClub.ValueInvestorsClub.models.Performance import Performance
 

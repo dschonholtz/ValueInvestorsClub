@@ -1,5 +1,5 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy import DateTime, Boolean, Float, String
+from sqlalchemy import DateTime, Boolean, String
 from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 

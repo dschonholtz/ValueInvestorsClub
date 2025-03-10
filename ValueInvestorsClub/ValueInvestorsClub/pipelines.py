@@ -8,9 +8,7 @@
 
 # This pipeline will dump the associated data into a postgres sql database.
 
-from itemadapter import ItemAdapter
-import os
-from ValueInvestorsClub.models import Base, Idea, Company, Description, User, Catalysts, Performance
+from ValueInvestorsClub.models import Base, Idea, Company, Description, User, Catalysts
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 import uuid
@@ -20,7 +18,7 @@ class SqlPipeline:
     collection_name = 'scrapy_items'
 
     def __init__(self, ):
-        self.engine = create_engine(f'postgresql+psycopg2://postgres:postgres@localhost/ideas', echo=True)
+        self.engine = create_engine('postgresql+psycopg2://postgres:postgres@localhost/ideas', echo=True)
         Base.Base.metadata.create_all(self.engine)
 
     def close_spider(self, spider):

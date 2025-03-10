@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import IdeaCard from '../../components/IdeaCard';
-import { usersApi, companiesApi } from '../../api/apiService';
+import { usersApi, companiesApi, ideasApi } from '../../api/apiService';
 import { Idea } from '../../types/api';
 
 // Mock the API services
@@ -14,10 +14,14 @@ jest.mock('../../api/apiService', () => ({
   companiesApi: {
     getCompanies: jest.fn(),
   },
+  ideasApi: {
+    getIdeaPerformance: jest.fn(),
+  },
 }));
 
 const mockUsersApi = usersApi as jest.Mocked<typeof usersApi>;
 const mockCompaniesApi = companiesApi as jest.Mocked<typeof companiesApi>;
+const mockIdeasApi = ideasApi as jest.Mocked<typeof ideasApi>;
 
 // Sample idea data
 const sampleIdea: Idea = {
@@ -55,6 +59,21 @@ describe('IdeaCard Component', () => {
     // Reset mock implementations
     mockUsersApi.getUsers.mockResolvedValue([]);
     mockCompaniesApi.getCompanies.mockResolvedValue([]);
+    mockIdeasApi.getIdeaPerformance.mockResolvedValue({
+      nextDayOpen: 0.5,
+      nextDayClose: 0.7,
+      oneWeekClosePerf: 1.5,
+      twoWeekClosePerf: 2.3,
+      oneMonthPerf: 3.2,
+      threeMonthPerf: 5.7,
+      sixMonthPerf: 8.4,
+      oneYearPerf: 12.5,
+      twoYearPerf: 24.8,
+      threeYearPerf: 35.1,
+      fiveYearPerf: 45.9,
+      timeline_labels: undefined,
+      timeline_values: undefined
+    });
   });
 
   test('renders the idea with loading states initially', async () => {

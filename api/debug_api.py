@@ -3,7 +3,7 @@
 Debug script to test API endpoints directly
 """
 
-import requests
+import requests  # type: ignore  # Missing stubs for requests library
 import json
 import sys
 from typing import Dict, Any, Optional

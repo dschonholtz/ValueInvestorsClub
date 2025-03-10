@@ -9,16 +9,13 @@ import {
   IdeaDetail, 
   Company, 
   User, 
-  Performance, 
-  Description, 
-  Catalysts 
+  Performance
 } from './api';
-import axios from 'axios';
 
 type SchemaProperty = {
   type: string;
   format?: string;
-  items?: any;
+  items?: SchemaProperty;
   properties?: Record<string, SchemaProperty>;
   $ref?: string;
 };
@@ -85,8 +82,8 @@ function validateType<T>(schemaName: string, schema: OpenAPISchema): boolean {
   
   // Attempt to use the sample with the TypeScript type
   try {
-    // This is a compile-time check only
-    const _typedSample: T = sample as unknown as T;
+    // This is a compile-time check only - cast only to verify compatibility
+    sample as unknown as T;
     console.log(`  ✅ ${schemaName} valid`);
     return true;
   } catch (error) {
@@ -98,11 +95,13 @@ function validateType<T>(schemaName: string, schema: OpenAPISchema): boolean {
 /**
  * Create a sample object from a schema definition
  */
-function createSample(schemaDefinition: any): any {
+function createSample(schemaDefinition: Record<string, unknown>): Record<string, unknown> | null {
   if (schemaDefinition.type === 'object') {
-    const result: Record<string, any> = {};
+    const result: Record<string, unknown> = {};
     
-    for (const [propertyName, propertySchema] of Object.entries<SchemaProperty>(schemaDefinition.properties)) {
+    for (const [propertyName, propertySchema] of Object.entries<SchemaProperty>(
+      schemaDefinition.properties as Record<string, SchemaProperty>
+    )) {
       result[propertyName] = createSampleForProperty(propertySchema);
     }
     
@@ -115,7 +114,7 @@ function createSample(schemaDefinition: any): any {
 /**
  * Create a sample value for a property
  */
-function createSampleForProperty(propertySchema: SchemaProperty): any {
+function createSampleForProperty(propertySchema: SchemaProperty): unknown {
   if (propertySchema.$ref) {
     // Reference to another schema, we'd need to resolve it
     return {};
@@ -133,10 +132,10 @@ function createSampleForProperty(propertySchema: SchemaProperty): any {
     case 'boolean':
       return true;
     case 'array':
-      return [createSampleForProperty(propertySchema.items)];
+      return propertySchema.items ? [createSampleForProperty(propertySchema.items)] : [];
     case 'object':
       if (propertySchema.properties) {
-        const result: Record<string, any> = {};
+        const result: Record<string, unknown> = {};
         for (const [propName, propSchema] of Object.entries<SchemaProperty>(propertySchema.properties)) {
           result[propName] = createSampleForProperty(propSchema);
         }

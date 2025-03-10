@@ -7,13 +7,12 @@ the database tables necessary for the application to function are created.
 """
 import os
 import pytest
-from fastapi.testclient import TestClient
-from pydantic import BaseModel, ValidationError
-from typing import List, Optional, Dict, Any
+from pydantic import BaseModel
+from typing import List, Optional, Dict
 from sqlalchemy import inspect, create_engine
 
-# Import response models from main API
-from api.main import (
+# Import response models from schemas
+from api.schemas import (
     IdeaResponse,
     IdeaDetailResponse,
     CompanyResponse,

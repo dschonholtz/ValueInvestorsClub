@@ -8,7 +8,6 @@ except ImportError:
     from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 
