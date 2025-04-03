@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey
-from sqlalchemy import DateTime, Boolean, Float, String
-from sqlalchemy.orm import Mapped
+from sqlalchemy import DateTime, Boolean, String
+from sqlalchemy.orm import Mapped, relationship
 from sqlalchemy.orm import mapped_column
 
 try:
@@ -14,11 +14,18 @@ class Idea(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     link: Mapped[str] = mapped_column(String(256))
-    company_id: Mapped[int] = mapped_column(ForeignKey("companies.ticker"))
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.user_link"))
+    company_id: Mapped[str] = mapped_column(ForeignKey("companies.ticker"))
+    user_id: Mapped[str] = mapped_column(ForeignKey("users.user_link"))
     date: Mapped[DateTime] = mapped_column(DateTime)
     is_short : Mapped[bool] = mapped_column(Boolean)
     is_contest_winner : Mapped[bool] = mapped_column(Boolean)
+    
+    # Relationships
+    company = relationship("Company", backref="ideas")
+    user = relationship("User", backref="ideas")
+    description = relationship("Description", uselist=False, backref="idea")
+    catalysts = relationship("Catalysts", uselist=False, backref="idea")
+    performance = relationship("Performance", uselist=False, backref="idea")
 
 
     def __repr__(self) -> str:

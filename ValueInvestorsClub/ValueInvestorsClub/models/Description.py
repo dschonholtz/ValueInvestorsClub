@@ -21,4 +21,4 @@ class Description(Base):
     description: Mapped[str] = mapped_column(String(128000))
 
     def __repr__(self) -> str:
-        return f"Description(id={self.idea_id!r}, catalyst={self.description!r})"
+        return f"Description(idea_id={self.idea_id!r}, description={self.description!r})"

@@ -8,7 +8,6 @@ except ImportError:
     from ValueInvestorsClub.ValueInvestorsClub.models.Base import Base
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import String
 from sqlalchemy import Float
 from sqlalchemy import ForeignKey
 
@@ -32,19 +31,16 @@ class Performance(Base):
     fiveYearPerf: Mapped[float] = mapped_column(Float, nullable=True)
 
     def __repr__(self) -> str:
-        return (f"Prices(ticker={self.ticker!r}"
-            # f"date={self.date!r}"
-            # f"sameDayOpen={self.sameDayOpen!r}"
-            # f"sameDayClose={self.sameDayClose!r}"
-            f"nextDayOpenPerf={self.nextDayOpen!r}"
-            f"nextDayClosePerf={self.nextDayClose!r}"
-            f"oneWeekClosePerf={self.oneWeekClosePerf!r}"
-            f"twoWeekClosePerf={self.twoWeekClosePerf!r}"
-            f"oneMonthPerf={self.oneMonthPerf!r}"
-            f"threeMonthPerf={self.threeMonthPerf!r}"
-            f"sixMonthPerf={self.sixMonthPerf!r}"
-            f"oneYearPerf={self.oneYearPerf!r}"
-            f"twoYearPerf={self.twoYearPerf!r}"
-            f"threeYearPerf={self.threeYearPerf!r}"
+        return (f"Performance(idea_id={self.idea_id!r}, "
+            f"nextDayOpen={self.nextDayOpen!r}, "
+            f"nextDayClose={self.nextDayClose!r}, "
+            f"oneWeekClosePerf={self.oneWeekClosePerf!r}, "
+            f"twoWeekClosePerf={self.twoWeekClosePerf!r}, "
+            f"oneMonthPerf={self.oneMonthPerf!r}, "
+            f"threeMonthPerf={self.threeMonthPerf!r}, "
+            f"sixMonthPerf={self.sixMonthPerf!r}, "
+            f"oneYearPerf={self.oneYearPerf!r}, "
+            f"twoYearPerf={self.twoYearPerf!r}, "
+            f"threeYearPerf={self.threeYearPerf!r}, "
             f"fiveYearPerf={self.fiveYearPerf!r})"
             )

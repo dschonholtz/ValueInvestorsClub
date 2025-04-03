@@ -1,0 +1,68 @@
+name: Docker Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+      
+      - name: Python linting with uv
+        run: |
+          uv pip install --system ruff mypy
+          ruff check .
+          mypy api/
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          
+      - name: Frontend linting
+        run: |
+          cd frontend
+          npm ci
+          npm run lint
+
+  docker-tests:
+    runs-on: ubuntu-latest
+    needs: [lint]
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+        
+      - name: Run backend tests
+        run: |
+          docker-compose -f docker-compose.test.yml up --build db-setup
+          docker-compose -f docker-compose.test.yml up --build backend-tests
+          
+      - name: Run schema validation tests
+        run: |
+          docker-compose -f docker-compose.test.yml up --build schema-tests
+
+      - name: Run frontend tests 
+        run: |
+          docker-compose -f docker-compose.test.yml up --build frontend-tests
+          
+      - name: Clean up
+        run: |
+          docker-compose -f docker-compose.test.yml down
+
+  # E2E tests can be added here if needed in the future

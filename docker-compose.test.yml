@@ -1,0 +1,121 @@
+version: '3.8'
+services:
+  python-lint:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    volumes:
+      - .:/app
+    command: >
+      sh -c "cd /app &&
+             pip install ruff mypy &&
+             ruff check --exclude 'node_modules/,data/,ValueInvestorsClub/,pricing.ipynb' . &&
+             mypy api/"
+
+  frontend-lint:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run lint
+
+  test-db:
+    image: postgres:14.1-alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test_ideas
+    ports:
+      - '5433:5432'  # Different port to avoid conflicts with the main db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+  
+  db-setup:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@test-db/test_ideas
+      - DB_HOST=test-db
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - TEST_DB_NAME=test_ideas
+      - PYTHONPATH=/app
+    volumes:
+      - .:/app
+    depends_on:
+      test-db:
+        condition: service_healthy
+    command: >
+      sh -c "cd /app &&
+             python -m api.tests.setup_test_db --drop"
+
+  backend-tests:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@test-db/test_ideas
+      - PYTHONPATH=/app
+      - PYTEST_ADDOPTS="-v"
+      - SKIP_DB_VERIFY=true
+      - CI=true
+    volumes:
+      - .:/app
+    depends_on:
+      db-setup:
+        condition: service_completed_successfully
+    command: >
+      sh -c "cd /app &&
+             python -m pytest api/tests/ -v -k 'not test_production_database_tables_exist'"
+
+  schema-tests:
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+    environment:
+      - DATABASE_URL=postgresql+psycopg2://postgres:postgres@test-db/test_ideas
+      - PYTHONPATH=/app
+      - SKIP_DB_VERIFY=true
+      - CI=true
+    volumes:
+      - .:/app
+    depends_on:
+      backend-tests:
+        condition: service_completed_successfully
+    command: >
+      sh -c "cd /app &&
+             python -m api.validate_schema"
+
+  frontend-tests:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build  # Use the build stage from the frontend Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Volume to preserve node_modules
+    command: npm test
+
+  e2e-tests:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build  # Use the build stage from the frontend Dockerfile
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # Volume to preserve node_modules
+    depends_on:
+      backend-tests:
+        condition: service_completed_successfully
+    environment:
+      - CYPRESS_baseUrl=http://api:8000
+    command: npm run test:e2e
